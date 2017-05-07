@@ -1,15 +1,27 @@
 # coding=utf-8
+"""Objects related to shopping"""
 from typing import Union
 
-import errors
 from connections import db
-from models.ingredient import Ingredient
+from models.stock import Ingredient
 
 
 class ShoppingItem(Ingredient):
+    """For displaying in shopping list"""
     def __init__(self, name: str, amount: Union[float, None] = None):
         super().__init__(name)
         self._amount: Union[float, None] = amount
+        self.current_price: Union[float, None] = None
+
+    @property
+    def status(self):
+        query = """
+        SELECT status
+        FROM shopping_list
+        WHERE ingredient = %s
+        """
+        res = db.select(query, self.name)
+        return res['status']
 
     @property
     def amount(self):
@@ -19,18 +31,35 @@ class ShoppingItem(Ingredient):
 
     def create(self):
         if self._amount is None:
-            errors.MissingParameter("amount")
+            self._amount = self.amount
         query = """
         INSERT INTO shopping_list (ingredient, wanted_amount)
         VALUES (%s, %s)
         """
         db.insert(query, self.name, self._amount)
 
+    def to_cart(self):
+        query = """
+        UPDATE shopping_list
+        SET status = 'cart'
+        WHERE ingredient = %s
+        """
+        db.update(query, self.name)
+
+    def from_cart(self):
+        query = """
+        UPDATE shopping_list
+        SET status = 'list'
+        WHERE ingredient = %s
+        """
+        db.update(query, self.name)
+
     def __eq__(self, other):
         return self.name == other.name
 
 
 class ShoppingList:
+    """Shopping list that fills itself and is ready for serving"""
     def __init__(self):
         self.list = list()
         self.suggested_list = list()
@@ -58,6 +87,7 @@ class ShoppingList:
         res = db.select_all(query)
         for item in res:
             item = ShoppingItem(item['id'])
+            item.create()
             if item not in self.list:
                 self.list.append(item)
 

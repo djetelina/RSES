@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Objects related to ingredients and stock"""
 from typing import Union, List
 
 import errors

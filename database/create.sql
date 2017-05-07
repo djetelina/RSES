@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS shopping_list;
+DROP TYPE IF EXISTS SHOPPING_STATUS;
 DROP TABLE IF EXISTS recipe_made;
 DROP TABLE IF EXISTS recipe_ingredients;
 DROP TABLE IF EXISTS categorized_recipes;
@@ -60,7 +61,8 @@ CREATE TABLE categorized_recipes
   recipe VARCHAR(60),
   category VARCHAR(20),
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
-  FOREIGN KEY (category) REFERENCES recipe (id) ON DELETE CASCADE
+  FOREIGN KEY (category) REFERENCES recipe (id) ON DELETE CASCADE,
+  PRIMARY KEY (recipe, category)
 );
 COMMENT ON TABLE categorized_recipes IS 'What categories does a recipe belong to';
 
@@ -84,10 +86,12 @@ CREATE TABLE recipe_made
 );
 COMMENT ON TABLE recipe_made IS 'When was the recipe made, each recorded history';
 
+CREATE TYPE SHOPPING_STATUS AS ENUM ('list', 'cart');
 CREATE TABLE shopping_list
 (
-  ingredient VARCHAR(80) PRIMARY KEY,
-  wanted_amount FLOAT,
+  ingredient    VARCHAR(80) PRIMARY KEY,
+  wanted_amount FLOAT NOT NULL,
+  status        SHOPPING_STATUS DEFAULT 'list',
   FOREIGN KEY (ingredient) REFERENCES ingredient (id) ON DELETE CASCADE
 );
 COMMENT ON TABLE shopping_list IS 'What needs to be bought'
