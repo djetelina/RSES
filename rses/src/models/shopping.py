@@ -16,7 +16,7 @@ class ShoppingItem(Ingredient):
         self.expiration_date: Union[datetime.date, None] = None
 
     @property
-    def status(self):
+    def status(self) -> str:
         """Whether the item is in cart, or not"""
         query = """
         SELECT status
@@ -27,10 +27,10 @@ class ShoppingItem(Ingredient):
         return res['status']
 
     @property
-    def amount(self):
+    def amount(self) -> float:
         """How many units of this ingredient should be bought"""
         if self._amount is None:
-            return self.suggestion_threshold + 1
+            return self.suggestion_threshold + 1.0
         return self._amount
 
     def __str__(self):

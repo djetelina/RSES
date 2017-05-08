@@ -95,7 +95,7 @@ class Ingredient:
             self.__load_from_db()
 
     @property
-    def average_price(self):
+    def average_price(self) -> float:
         """Average price of the ingredient"""
         query = """
         SELECT avg(price) 

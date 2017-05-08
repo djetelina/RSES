@@ -43,11 +43,11 @@ COMMENT ON TABLE stock IS 'Stock of ingredients';
 
 CREATE TABLE recipe
 (
-  id VARCHAR(60) PRIMARY KEY,
-  directions TEXT,
-  picture VARCHAR(250),
+  id           VARCHAR(60) PRIMARY KEY,
+  directions   TEXT NOT NULL,
+  picture      VARCHAR(250),
   prepare_time INT,
-  portions INT
+  portions     INT  NOT NULL
 );
 COMMENT ON COLUMN recipe.prepare_time IS 'Time in minutes';
 
@@ -79,9 +79,10 @@ COMMENT ON TABLE recipe_ingredients IS 'Ingredients for a recipe';
 
 CREATE TABLE recipe_made
 (
-  recipe VARCHAR(60),
+  recipe    VARCHAR(60),
   time_made TIMESTAMP DEFAULT NOW(),
-  portions INT NOT NULL,
+  portions  INT   NOT NULL,
+  price     FLOAT NOT NULL,
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE
 );
 COMMENT ON TABLE recipe_made IS 'When was the recipe made, each recorded history';

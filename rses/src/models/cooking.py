@@ -73,7 +73,7 @@ class Recipe:
             directions: str = '',
             picture: Union[str, None] = None,
             prepare_time: Union[int, None] = None,
-            portions: int = 1,
+            portions: Union[int, None] = None,
             new: bool = False
     ):
         """
@@ -81,30 +81,62 @@ class Recipe:
         :param directions:      How to make it :)
         :param picture:         Picture of the finished thing
         :param prepare_time:    Prepare time in minutes
-        :param portions:        How many portions does the recipe counts with
+        :param portions:        For how many portions should the recipe be shown
         :param new:             If it's a new recipe, so it doesn't try and load from database
         """
         self.name: str = name
         self.directions: str = directions
         self.picture: Union[str, None] = picture
         self.prepare_time: Union[int, None] = prepare_time
-        self.portions: int = portions
-        self.ingredients: List[Dict[Ingredient, float]] = []
-        self.categories: List[RecipeCategory] = []
+        self.portions: Union[int, None] = portions
+        self.ingredients: Dict[Ingredient, float] = dict()
+        self.categories: List[RecipeCategory] = list()
         if not new:
             self.__load_from_db()
 
+    @property
+    def portion_price(self) -> float:
+        """Price of a single portion based on ingredient average"""
+        return self.current_price / self.portions
+
+    @property
+    def current_price(self) -> float:
+        """Price of the whole meal based on ingredient average"""
+        price: float = 0.0
+        for ingredient, amount in self.ingredients:
+            price += ingredient.average_price * amount
+        return price
+
+    def create(self):
+        """Creates the recipe, has to be created before ingredients and categories are added!"""
+        required_params = dict(portions=self.portions)
+        for name, param in required_params:
+            if param is None:
+                errors.MissingParameter(name)
+        query = """
+        INSERT INTO recipe (id, directions, picture, prepare_time, portions) 
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        db.insert(query, self.name, self.directions, self.picture, self.prepare_time, self.portions)
+
+    def delete(self):
+        """Deletes the recipe"""
+        query = """
+        DELETE FROM recipe
+        WHERE id = %s
+        """
+        db.delete(query, self.name)
+
     def add_ingredient(self, ingredient: Ingredient, amount: float):
         """Adds an ingredient to the recipe"""
-        for d in self.ingredients:
-            if d in d.keys():
-                raise errors.AlreadyExists(ingredient, relation=self)
+        if ingredient in self.ingredients.keys():
+            raise errors.AlreadyExists(ingredient, relation=self)
         query = """
         INSERT INTO recipe_ingredients (recipe, ingredient, amount) 
         VALUES (%s, %s, %s)
         """
         db.insert(query, self.name, ingredient.name, amount)
-        self.ingredients.append({ingredient: amount})
+        self.ingredients[ingredient] = amount
 
     def remove_ingredient(self, ingredient: Ingredient):
         """Removes an ingredient from the recipe"""
@@ -114,10 +146,7 @@ class Recipe:
         AND recipe = %s
         """
         db.delete(query, ingredient.name, self.name)
-        for d in self.ingredients:
-            if ingredient in d.keys():
-                self.ingredients.remove(d)
-                break
+        self.ingredients.pop(ingredient, None)
 
     def add_category(self, category: RecipeCategory):
         """Adds the recipe into a category"""
@@ -139,7 +168,16 @@ class Recipe:
         """
         db.delete(query, self.name, category.name)
 
+    def cook(self):
+        query = """
+        INSERT INTO recipe_made (recipe, portions, price) 
+        VALUES (%s, %s, %s)
+        """
+        db.insert(query, self.name, self.portions, self.current_price)
+
     def __load_from_db(self):
+        wanted_portions: Union[int, None] = self.portions
+
         query = """
         SELECT directions, picture, prepare_time, portions
         FROM recipe
@@ -150,6 +188,12 @@ class Recipe:
         self.picture = res['picture'],
         self.prepare_time = res['prepare_time']
         self.portions = res['portions']
+
+        if wanted_portions is not None:
+            adjust_portion: float = wanted_portions / self.portions
+        else:
+            adjust_portion = 1
+
         query_ingredients = """
         SELECT ingredient, amount
         FROM recipe_ingredients
@@ -158,7 +202,8 @@ class Recipe:
         res = db.select_all(query_ingredients, self.name)
         for i in res:
             ingredient = Ingredient(i['ingredient'])
-            self.ingredients.append({ingredient: i['amount']})
+            adjusted_amount: float = i['amount'] * adjust_portion
+            self.ingredients[ingredient] = adjusted_amount
         query_categories = """
         SELECT category
         FROM categorized_recipes
