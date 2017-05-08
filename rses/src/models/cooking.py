@@ -22,6 +22,7 @@ class RecipeCategory:
         return f'RecipeCategory(name={self.name})'
 
     def exists(self) -> bool:
+        """Checks whether the recipe category exists"""
         query = """
         SELECT * 
         FROM recipe_category
@@ -31,6 +32,7 @@ class RecipeCategory:
         return bool(res)
 
     def create(self):
+        """Creates the recipe category"""
         if self.exists():
             raise errors.AlreadyExists(self)
         query = """
@@ -40,6 +42,7 @@ class RecipeCategory:
         db.insert(query, self.name)
 
     def delete(self):
+        """Deletes the recipe category"""
         if not self.exists():
             raise errors.DoesNotExist(RecipeCategory, identifier=self.name)
         query = """
@@ -63,6 +66,7 @@ class RecipeCategory:
 
 
 class Recipe:
+    """A recipe object"""
     def __init__(
             self,
             name: str,
@@ -72,21 +76,29 @@ class Recipe:
             portions: int = 1,
             new: bool = False
     ):
-        self.name = name
-        self.directions = directions
-        self.picture = picture
-        self.prepare_time = prepare_time
-        self.portions = portions
+        """
+        :param name:            Name of the recipe
+        :param directions:      How to make it :)
+        :param picture:         Picture of the finished thing
+        :param prepare_time:    Prepare time in minutes
+        :param portions:        How many portions does the recipe counts with
+        :param new:             If it's a new recipe, so it doesn't try and load from database
+        """
+        self.name: str = name
+        self.directions: str = directions
+        self.picture: Union[str, None] = picture
+        self.prepare_time: Union[int, None] = prepare_time
+        self.portions: int = portions
         self.ingredients: List[Dict[Ingredient, float]] = []
         self.categories: List[RecipeCategory] = []
         if not new:
             self.__load_from_db()
 
     def add_ingredient(self, ingredient: Ingredient, amount: float):
+        """Adds an ingredient to the recipe"""
         for d in self.ingredients:
             if d in d.keys():
-                # TODO second parameter of error to show relation
-                raise errors.AlreadyExists(ingredient)
+                raise errors.AlreadyExists(ingredient, relation=self)
         query = """
         INSERT INTO recipe_ingredients (recipe, ingredient, amount) 
         VALUES (%s, %s, %s)
@@ -95,6 +107,7 @@ class Recipe:
         self.ingredients.append({ingredient: amount})
 
     def remove_ingredient(self, ingredient: Ingredient):
+        """Removes an ingredient from the recipe"""
         query = """
         DELETE FROM recipe_ingredients
         WHERE ingredient = %s 
@@ -107,9 +120,9 @@ class Recipe:
                 break
 
     def add_category(self, category: RecipeCategory):
+        """Adds the recipe into a category"""
         if category in self.categories:
-            # TODO second parameter of error to show relation
-            raise errors.AlreadyExists(category)
+            raise errors.AlreadyExists(category, relation=self)
         query = """
         INSERT INTO categorized_recipes (recipe, category) 
         VALUES (%s, %s)
@@ -118,6 +131,7 @@ class Recipe:
         self.categories.append(category)
 
     def remove_category(self, category: RecipeCategory):
+        """Removes the recipe from a category"""
         query = """
         DELETE FROM categorized_recipes
         WHERE recipe = %s
@@ -126,5 +140,30 @@ class Recipe:
         db.delete(query, self.name, category.name)
 
     def __load_from_db(self):
-        # TODO continue here
-        pass
+        query = """
+        SELECT directions, picture, prepare_time, portions
+        FROM recipe
+        WHERE id = %s
+        """
+        res = db.select(query, self.name)
+        self.directions = res['directions']
+        self.picture = res['picture'],
+        self.prepare_time = res['prepare_time']
+        self.portions = res['portions']
+        query_ingredients = """
+        SELECT ingredient, amount
+        FROM recipe_ingredients
+        WHERE recipe = %s
+        """
+        res = db.select_all(query_ingredients, self.name)
+        for i in res:
+            ingredient = Ingredient(i['ingredient'])
+            self.ingredients.append({ingredient: i['amount']})
+        query_categories = """
+        SELECT category
+        FROM categorized_recipes
+        WHERE recipe = %s
+        """
+        res = db.select_all(query_categories, self.name)
+        for category in res:
+            self.categories.append(category['category'])

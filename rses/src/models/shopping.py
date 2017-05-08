@@ -1,5 +1,6 @@
 # coding=utf-8
 """Objects related to shopping"""
+from datetime import datetime
 from typing import Union
 
 from connections import db
@@ -12,9 +13,11 @@ class ShoppingItem(Ingredient):
         super().__init__(name)
         self._amount: Union[float, None] = amount
         self.current_price: Union[float, None] = None
+        self.expiration_date: Union[datetime.date, None] = None
 
     @property
     def status(self):
+        """Whether the item is in cart, or not"""
         query = """
         SELECT status
         FROM shopping_list
@@ -25,11 +28,20 @@ class ShoppingItem(Ingredient):
 
     @property
     def amount(self):
+        """How many units of this ingredient should be bought"""
         if self._amount is None:
             return self.suggestion_threshold + 1
         return self._amount
 
+    def __str__(self):
+        return f'{self.amount}x {self.unit} {self.name}'
+
+    def __repr__(self):
+        return f'ShoppingItem(name:{self.name}, _amount:{self.amount}, current_price: {self.current_price}, ' \
+               f'average_price:{self.average_price}, status:{self.status})'
+
     def create(self):
+        """Adds the item into the database of things to buy"""
         if self._amount is None:
             self._amount = self.amount
         query = """
@@ -39,6 +51,7 @@ class ShoppingItem(Ingredient):
         db.insert(query, self.name, self._amount)
 
     def to_cart(self):
+        """Marks the item as in cart"""
         query = """
         UPDATE shopping_list
         SET status = 'cart'
@@ -47,12 +60,26 @@ class ShoppingItem(Ingredient):
         db.update(query, self.name)
 
     def from_cart(self):
+        """Moves the item back from 'cart' to on-list"""
         query = """
         UPDATE shopping_list
         SET status = 'list'
         WHERE ingredient = %s
         """
         db.update(query, self.name)
+
+    def purchase(self):
+        """Adds the item to stock and deletes it from shopping list database"""
+        query_insert = """
+        INSERT INTO stock (ingredient, amount, amount_left, expiration_date, price)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        db.insert(query_insert, self.name, self.amount, self.amount, self.expiration_date, self.current_price)
+        query_delete = """
+        DELETE FROM shopping_list
+        WHERE ingredient = %s
+        """
+        db.delete(query_delete, self.name)
 
     def __eq__(self, other):
         return self.name == other.name
@@ -67,6 +94,12 @@ class ShoppingList:
         self.__add_critical()
         self.__add_suggested()
 
+    def __str__(self):
+        return f'Shopping list: {self.list}, suggestions: {self.suggested_list}'
+
+    def __repr__(self):
+        return f'ShoppingList(list:{repr(self.list)}, suggested_list:{repr(self.suggested_list)})'
+
     def __add_from_db_list(self):
         query = """
         SELECT ingredient, wanted_amount
@@ -77,12 +110,18 @@ class ShoppingList:
             self.list.append(ShoppingItem(item['ingredient'], item['wanted_amount']))
 
     def __add_critical(self):
+        """
+        Adds items to the shopping list that are under the critical threshold to rebuy.
+        
+        If the threshold is 0, it means it shouldn't be rebought
+        """
         query = """
         SELECT id
         FROM ingredient i
         LEFT JOIN stock s 
           ON i.id = s.ingredient
         WHERE count(s.amount_left) < i.rebuy_threshold
+        AND i.rebuy_threshold > 0
         """
         res = db.select_all(query)
         for item in res:
@@ -92,12 +131,16 @@ class ShoppingList:
                 self.list.append(item)
 
     def __add_suggested(self):
+        """
+        Suggests items for purchase, but does not add them to things to buy - this has to be done manually
+        """
         query = """
         SELECT id
         FROM ingredient i
         LEFT JOIN stock s 
           ON i.id = s.ingredient
         WHERE count(s.amount_left) < i.suggestion_threshold
+        AND i.suggestion_threshold > 0
         """
         res = db.select_all(query)
         for item in res:

@@ -20,6 +20,7 @@ class IngredientType:
         return f'IngredientType(name={self.name})'
 
     def exists(self) -> bool:
+        """Whether the ingredient type exists"""
         query = """
         SELECT * 
         FROM ingredient_type
@@ -29,6 +30,7 @@ class IngredientType:
         return bool(res)
 
     def create(self):
+        """Creates an ingredient type"""
         if self.exists():
             raise errors.AlreadyExists(self)
         query = """
@@ -38,6 +40,7 @@ class IngredientType:
         db.insert(query, self.name)
 
     def delete(self):
+        """Deletes an ingredient type"""
         if not self.exists():
             raise errors.DoesNotExist(IngredientType, identifier=self.name)
         query = """
@@ -65,12 +68,12 @@ class Ingredient:
     def __init__(
             self,
             name: str,
-            unit: Union[str, None]=None,
-            ingredient_type: Union[str, None]=None,
-            suggestion_threshold: float=0.0,
-            rebuy_threshold: float=0.0,
-            durability: int=None,
-            new: bool=False
+            unit: object = None,
+            ingredient_type: object = None,
+            suggestion_threshold: object = 0.0,
+            rebuy_threshold: object = 0.0,
+            durability: object = None,
+            new: object = False
     ):
         """
         :param name:                    The name of the ingredient, as will be display everywhere
@@ -93,6 +96,7 @@ class Ingredient:
 
     @property
     def average_price(self):
+        """Average price of the ingredient"""
         query = """
         SELECT avg(price) 
         FROM stock
@@ -110,6 +114,9 @@ class Ingredient:
                f'suggestion_threshold={self.suggestion_threshold}, rebuy_threshold={self.rebuy_threshold}'
 
     def exists(self) -> bool:
+        """
+        :return:    If the ingredient exists
+        """
         query = """
         SELECT * 
         FROM ingredient
@@ -135,7 +142,8 @@ class Ingredient:
         query = """
         INSERT INTO ingredient (id, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability)
         VALUES (%s, %s, %s, %s, %s, %s)"""
-        db.insert(query, self.name, self.unit, self.type, self.suggestion_threshold, self.rebuy_threshold, self.durability)
+        db.insert(query, self.name, self.unit, self.type, self.suggestion_threshold, self.rebuy_threshold,
+                  self.durability)
 
     def in_stock(self) -> float:
         """
