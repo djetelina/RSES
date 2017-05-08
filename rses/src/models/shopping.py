@@ -9,8 +9,8 @@ from models.stock import Ingredient
 
 class ShoppingItem(Ingredient):
     """For displaying in shopping list"""
-    def __init__(self, name: str, amount: Union[float, None] = None):
-        super().__init__(name)
+    def __init__(self, id: int, amount: Union[float, None] = None):
+        super().__init__(id)
         self._amount: Union[float, None] = amount
         self.current_price: Union[float, None] = None
         self.expiration_date: Union[datetime.date, None] = None
@@ -23,21 +23,21 @@ class ShoppingItem(Ingredient):
         FROM shopping_list
         WHERE ingredient = %s
         """
-        res = db.select(query, self.name)
+        res = db.select(query, self._id)
         return res.status
 
     @property
     def amount(self) -> float:
         """How many units of this ingredient should be bought"""
         if self._amount is None:
-            return self.suggestion_threshold + 1.0
+            return self._suggestion_threshold + 1.0
         return self._amount
 
     def __str__(self):
-        return f'{self.amount}x {self.unit} {self.name}'
+        return f'{self.amount}x {self._unit} {self._name}'
 
     def __repr__(self):
-        return f'ShoppingItem(name:{self.name}, _amount:{self.amount}, current_price: {self.current_price}, ' \
+        return f'ShoppingItem(name:{self._name}, _amount:{self.amount}, current_price: {self.current_price}, ' \
                f'average_price:{self.average_price}, status:{self.status})'
 
     def create(self):
@@ -48,7 +48,7 @@ class ShoppingItem(Ingredient):
         INSERT INTO shopping_list (ingredient, wanted_amount)
         VALUES (%s, %s)
         """
-        db.insert(query, self.name, self._amount)
+        db.insert(query, self._id, self._amount)
 
     def to_cart(self):
         """Marks the item as in cart"""
@@ -57,7 +57,7 @@ class ShoppingItem(Ingredient):
         SET status = 'cart'
         WHERE ingredient = %s
         """
-        db.update(query, self.name)
+        db.update(query, self._id)
 
     def from_cart(self):
         """Moves the item back from 'cart' to on-list"""
@@ -66,7 +66,7 @@ class ShoppingItem(Ingredient):
         SET status = 'list'
         WHERE ingredient = %s
         """
-        db.update(query, self.name)
+        db.update(query, self._id)
 
     def purchase(self):
         """Adds the item to stock and deletes it from shopping list database"""
@@ -74,15 +74,15 @@ class ShoppingItem(Ingredient):
         INSERT INTO stock (ingredient, amount, amount_left, expiration_date, price)
         VALUES (%s, %s, %s, %s, %s)
         """
-        db.insert(query_insert, self.name, self.amount, self.amount, self.expiration_date, self.current_price)
+        db.insert(query_insert, self._id, self.amount, self.amount, self.expiration_date, self.current_price)
         query_delete = """
         DELETE FROM shopping_list
         WHERE ingredient = %s
         """
-        db.delete(query_delete, self.name)
+        db.delete(query_delete, self._id)
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self._id == other._id and self._name == other._name
 
 
 class ShoppingList:

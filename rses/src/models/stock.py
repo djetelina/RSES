@@ -1,98 +1,190 @@
 # coding=utf-8
 """Objects related to ingredients and stock"""
+import logging
 from typing import Union, List
+
+from psycopg2 import sql
 
 import errors
 from connections import db
+
+log = logging.getLogger(__name__)
 
 
 class IngredientType:
     """
     For shopping list organization and filtering
     """
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, id: Union[int, None]=None, name: Union[str, None]=None):
+        log.debug('Init of %s', repr(self))
+        self._id: Union[int, None] = id
+        self._name: Union[str, None] = name
+        if not self._id:
+            self.create()
+        elif not self._name:
+            self.__load_from_db()
 
     def __str__(self):
-        return self.name
+        return f"Ingredient type '{self.name}'"
 
     def __repr__(self):
-        return f'IngredientType(name={self.name})'
+        return f'IngredientType(id={self.id}, name={self.name})'
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, new_name: str):
+        log.debug("Updating name of %, new name: %s", str(self), new_name)
+        query = """
+        UPDATE ingredient_type
+        SET name = %s
+        WHERE id = %s
+        """
+        db.update(query, new_name, self._id)
+        self._name = new_name
 
     def exists(self) -> bool:
         """Whether the ingredient type exists"""
         query = """
         SELECT * 
         FROM ingredient_type
-        WHERE id = %s
+        WHERE name = %s
         """
-        res = db.select(query, self.name)
+        res = db.select(query, self._name)
         return bool(res)
 
     def create(self):
         """Creates an ingredient type"""
+        log.debug('Trying to create new %s', str(self))
         if self.exists():
             raise errors.AlreadyExists(self)
         query = """
-        INSERT INTO ingredient_type (id)
+        INSERT INTO ingredient_type (name)
         VALUES (%s)
+        RETURNING id
         """
-        db.insert(query, self.name)
+        self._id = db.insert(query, self._name).id
+        log.debug('Created, new id: %s', self.id)
 
     def delete(self):
         """Deletes an ingredient type"""
+        log.debug('Deleting %s', str(self))
         if not self.exists():
-            raise errors.DoesNotExist(IngredientType, identifier=self.name)
+            raise errors.DoesNotExist(IngredientType, identifier=self._name)
         query = """
         DELETE FROM ingredient_type
         WHERE id = %s
         """
-        db.delete(query, self.name)
+        db.delete(query, self._id)
 
     def items(self) -> List[Ingredient]:
         """All ingredients of this type"""
+        log.debug('Getting all ingredients of %s', str(self))
         query = """
         SELECT id as id
         FROM ingredient
         WHERE ingredient_type = %s
         """
-        res = db.select_all(query, self.name)
+        res = db.select_all(query, self._id)
         ingredients = list()
         for item in res:
             ingredients.append(Ingredient(item.id))
         return ingredients
+
+    def __load_from_db(self):
+        """Loads ingredient type from the database"""
+        query = """
+        SELECT name
+        FROM ingredient_type
+        WHERE id = %s
+        """
+        res = db.select(query, self._id)
+        self._name = res.name
 
 
 class Ingredient:
     """An ingredient to buy and use in recipes"""
     def __init__(
             self,
-            name: str,
-            unit: object = None,
-            ingredient_type: object = None,
-            suggestion_threshold: object = 0.0,
-            rebuy_threshold: object = 0.0,
-            durability: object = None,
-            new: object = False
+            id: Union[int, None]=None,
+            name: Union[str, None]=None,
+            unit: Union[str, None] = None,
+            ingredient_type: Union[IngredientType, None] = None,
+            suggestion_threshold: Union[float, None] = 0.0,
+            rebuy_threshold: Union[float, None] = 0.0,
+            durability: Union[int, None] = None,
     ):
         """
+        :param id:                      Identifier for an ingredient, assigned be the database on creation
         :param name:                    The name of the ingredient, as will be display everywhere
         :param unit:                    The measurable unit of the ingredient, can be virtually anything
         :param ingredient_type:         The type if ingredient that the item belongs to
-        :param suggestion_threshold:    When the shopping system will recommend you to maybe purchse
+        :param suggestion_threshold:    When the shopping system will recommend you to maybe purchase
         :param rebuy_threshold:         When the shopping system tells you to absolutely buy it next time you see it
         :param durability:              If specified, calculates the expiration date based on the date of purchase
-        :param new:                     If this is an ingredient to be created, 
-                                        so it doesn't try and load it from the database
         """
-        self.name: str = name
-        self.unit: Union[str, None] = unit
-        self.type: IngredientType = ingredient_type
-        self.suggestion_threshold: float = suggestion_threshold
-        self.rebuy_threshold: float = rebuy_threshold
-        self.durability: int = durability
-        if not new:
+        self._id: int = id
+        self._name: str = name
+        self._unit: Union[str, None] = unit
+        self._type: Union[IngredientType, None] = ingredient_type
+        self._suggestion_threshold: Union[float, None] = suggestion_threshold
+        self._rebuy_threshold: Union[float, None] = rebuy_threshold
+        self._durability: Union[int, None] = durability
+        if not self._id:
+            self.create()
+        else:
             self.__load_from_db()
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        self._name = self.__updater('name', new_name)
+
+    @property
+    def unit(self) -> str:
+        return self._unit
+
+    @unit.setter
+    def unit(self, new_unit):
+        self._unit = self.__updater('unit', new_unit)
+
+    @property
+    def type(self) -> IngredientType:
+        return self._type
+
+    @type.setter
+    def type(self, new_type: IngredientType):
+        self.__updater('type', new_type.id)
+        self._type = new_type
+
+    @property
+    def suggestion_threshold(self):
+        return self._suggestion_threshold
+
+    @suggestion_threshold.setter
+    def suggestion_threshold(self, new_threshold):
+        self._suggestion_threshold = self.__updater('suggestion_threshold', new_threshold)
+
+    @property
+    def rebuy_threshold(self):
+        return self._suggestion_threshold
+
+    @rebuy_threshold.setter
+    def suggestion_threshold(self, new_threshold):
+        self._rebuy_threshold = self.__updater('rebuy_threshold', new_threshold)
 
     @property
     def average_price(self) -> float:
@@ -104,14 +196,14 @@ class Ingredient:
         ORDER BY time_bought DESC 
         LIMIT 30
         """
-        return db.select(query, self.name).average
+        return db.select(query, self._name).average
 
     def __str__(self):
-        return self.name
+        return self._name
 
     def __repr__(self):
-        return f'Ingredient(name={self.name}, unit={self.unit}, type={self.type}, ' \
-               f'suggestion_threshold={self.suggestion_threshold}, rebuy_threshold={self.rebuy_threshold}'
+        return f'Ingredient(name={self._name}, unit={self._unit}, type={repr(self._type)}, ' \
+               f'suggestion_threshold={self._suggestion_threshold}, rebuy_threshold={self._rebuy_threshold}'
 
     def exists(self) -> bool:
         """
@@ -120,9 +212,9 @@ class Ingredient:
         query = """
         SELECT * 
         FROM ingredient
-        WHERE id = %s
+        WHERE name = %s
         """
-        res = db.select(query, self.name)
+        res = db.select(query, self._name)
         return bool(res)
 
     def create(self):
@@ -131,19 +223,18 @@ class Ingredient:
         
         Default thresholds are 0 and no durability is set.
         """
-        required_params = dict(type=self.type, unit=self.unit)
+        required_params = dict(type=self._type, unit=self._unit)
         for name, param in required_params:
             if param is None:
                 errors.MissingParameter(name)
-        if not IngredientType(self.type).exists():
-            IngredientType(self.type).create()
         if self.exists():
             raise errors.AlreadyExists(self)
         query = """
-        INSERT INTO ingredient (id, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability)
-        VALUES (%s, %s, %s, %s, %s, %s)"""
-        db.insert(query, self.name, self.unit, self.type, self.suggestion_threshold, self.rebuy_threshold,
-                  self.durability)
+        INSERT INTO ingredient (name, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING id"""
+        self._id = db.insert(query, self._name, self._unit, self._type.id, self._suggestion_threshold,
+                             self._rebuy_threshold, self._durability).id
 
     def in_stock(self) -> float:
         """
@@ -156,8 +247,18 @@ class Ingredient:
         FROM stock
         WHERE ingredient = %s
         """
-        res = db.select(query, self.name)
+        res = db.select(query, self._id)
         return res.amount
+
+    def __updater(self, column, new_value):
+        query = sql.SQL("""
+        UPDATE ingredient
+        SET {} = %s
+        WHERE id = %s
+        """).format(sql.Identifier(column))
+        db.update(query, new_value, self._id)
+        return new_value
+
 
     def __load_from_db(self):
         query = """
@@ -165,12 +266,9 @@ class Ingredient:
         FROM ingredient
         WHERE id = %s
         """
-        res = db.select(query, self.name)
-        if not res:
-            raise errors.DoesNotExist(Ingredient, identifier=self.name,
-                                      add_info='New ingredients should be initiated with keyword new')
-        self.unit = res.unit
-        self.type = res.ingredient_type
-        self.suggestion_threshold = res.suggestion_threshold
-        self.rebuy_threshold = res.rebuy_threshold
-        self.durability = res.durability
+        res = db.select(query, self._id)
+        self._unit = res.unit
+        self._type = IngredientType(id=res.ingredient_type)
+        self._suggestion_threshold = res.suggestion_threshold
+        self._rebuy_threshold = res.rebuy_threshold
+        self._durability = res.durability

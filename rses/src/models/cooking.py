@@ -135,7 +135,7 @@ class Recipe:
         INSERT INTO recipe_ingredients (recipe, ingredient, amount) 
         VALUES (%s, %s, %s)
         """
-        db.insert(query, self.name, ingredient.name, amount)
+        db.insert(query, self.name, ingredient._id, amount)
         self.ingredients[ingredient] = amount
 
     def remove_ingredient(self, ingredient: Ingredient):
@@ -145,7 +145,7 @@ class Recipe:
         WHERE ingredient = %s 
         AND recipe = %s
         """
-        db.delete(query, ingredient.name, self.name)
+        db.delete(query, ingredient._id, self.name)
         self.ingredients.pop(ingredient, None)
 
     def add_category(self, category: RecipeCategory):

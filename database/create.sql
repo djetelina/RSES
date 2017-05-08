@@ -12,15 +12,17 @@ DROP TABLE IF EXISTS ingredient_type;
 
 CREATE TABLE ingredient_type
 (
-  id VARCHAR(50) PRIMARY KEY
+  id SERIAL UNIQUE,
+  name VARCHAR(50) PRIMARY KEY
 );
 COMMENT ON TABLE ingredient_type IS 'Type of ingredient';
 
 CREATE TABLE ingredient
 (
-  id VARCHAR(80) PRIMARY KEY,
+  id SERIAL UNIQUE,
+  name VARCHAR(80) PRIMARY KEY,
   unit VARCHAR(10) NOT NULL,
-  ingredient_type VARCHAR(50) NOT NULL,
+  ingredient_type INT NOT NULL,
   suggestion_threshold FLOAT DEFAULT 0.0,
   rebuy_threshold FLOAT DEFAULT 0.0,
   durability INT DEFAULT NULL,
@@ -31,7 +33,7 @@ COMMENT ON COLUMN ingredient.durability IS 'Days before the ingredient expires i
 
 CREATE TABLE stock
 (
-  ingredient VARCHAR(80),
+  ingredient INT NOT NULL,
   amount FLOAT NOT NULL,
   amount_left FLOAT NOT NULL,
   expiration_date DATE,
@@ -69,7 +71,7 @@ COMMENT ON TABLE categorized_recipes IS 'What categories does a recipe belong to
 CREATE TABLE recipe_ingredients
 (
   recipe VARCHAR(60),
-  ingredient VARCHAR(80),
+  ingredient INT,
   amount FLOAT NOT NULL,
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
   FOREIGN KEY (ingredient) REFERENCES ingredient (id) ON DELETE CASCADE,
@@ -90,7 +92,7 @@ COMMENT ON TABLE recipe_made IS 'When was the recipe made, each recorded history
 CREATE TYPE SHOPPING_STATUS AS ENUM ('list', 'cart');
 CREATE TABLE shopping_list
 (
-  ingredient    VARCHAR(80) PRIMARY KEY,
+  ingredient    INT PRIMARY KEY,
   wanted_amount FLOAT NOT NULL,
   status        SHOPPING_STATUS DEFAULT 'list',
   FOREIGN KEY (ingredient) REFERENCES ingredient (id) ON DELETE CASCADE
