@@ -61,7 +61,7 @@ CREATE TABLE categorized_recipes
   recipe VARCHAR(60),
   category VARCHAR(20),
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
-  FOREIGN KEY (category) REFERENCES recipe (id) ON DELETE CASCADE,
+  FOREIGN KEY (category) REFERENCES recipe_category (id) ON DELETE CASCADE,
   PRIMARY KEY (recipe, category)
 );
 COMMENT ON TABLE categorized_recipes IS 'What categories does a recipe belong to';
