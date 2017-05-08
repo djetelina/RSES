@@ -59,7 +59,7 @@ class IngredientType:
         res = db.select_all(query, self.name)
         ingredients = list()
         for item in res:
-            ingredients.append(Ingredient(item["id"]))
+            ingredients.append(Ingredient(item.id))
         return ingredients
 
 
@@ -98,13 +98,13 @@ class Ingredient:
     def average_price(self) -> float:
         """Average price of the ingredient"""
         query = """
-        SELECT avg(price) 
+        SELECT avg(price) as average
         FROM stock
         WHERE ingredient = %s 
         ORDER BY time_bought DESC 
         LIMIT 30
         """
-        return db.select(query, self.name)
+        return db.select(query, self.name).average
 
     def __str__(self):
         return self.name
@@ -169,8 +169,8 @@ class Ingredient:
         if not res:
             raise errors.DoesNotExist(Ingredient, identifier=self.name,
                                       add_info='New ingredients should be initiated with keyword new')
-        self.unit = res["unit"]
-        self.type = res["ingredient_type"]
-        self.suggestion_threshold = res["suggestion_threshold"]
-        self.rebuy_threshold = res["rebuy_threshold"]
-        self.durability = res["durability"]
+        self.unit = res.unit
+        self.type = res.ingredient_type
+        self.suggestion_threshold = res.suggestion_threshold
+        self.rebuy_threshold = res.rebuy_threshold
+        self.durability = res.durability

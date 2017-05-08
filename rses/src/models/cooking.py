@@ -61,7 +61,7 @@ class RecipeCategory:
         res = db.select_all(query, self.name)
         recipes = list()
         for item in res:
-            recipes.append(Recipe(item["id"]))
+            recipes.append(Recipe(item.id))
         return recipes
 
 
@@ -184,10 +184,10 @@ class Recipe:
         WHERE id = %s
         """
         res = db.select(query, self.name)
-        self.directions = res['directions']
-        self.picture = res['picture'],
-        self.prepare_time = res['prepare_time']
-        self.portions = res['portions']
+        self.directions = res.directions
+        self.picture = res.picture,
+        self.prepare_time = res.prepare_time
+        self.portions = res.portions
 
         if wanted_portions is not None:
             adjust_portion: float = wanted_portions / self.portions
@@ -201,8 +201,8 @@ class Recipe:
         """
         res = db.select_all(query_ingredients, self.name)
         for i in res:
-            ingredient = Ingredient(i['ingredient'])
-            adjusted_amount: float = i['amount'] * adjust_portion
+            ingredient = Ingredient(i.ingredient)
+            adjusted_amount: float = i.amount * adjust_portion
             self.ingredients[ingredient] = adjusted_amount
         query_categories = """
         SELECT category
@@ -211,4 +211,4 @@ class Recipe:
         """
         res = db.select_all(query_categories, self.name)
         for category in res:
-            self.categories.append(category['category'])
+            self.categories.append(category.category)

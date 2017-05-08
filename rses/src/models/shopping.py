@@ -24,7 +24,7 @@ class ShoppingItem(Ingredient):
         WHERE ingredient = %s
         """
         res = db.select(query, self.name)
-        return res['status']
+        return res.status
 
     @property
     def amount(self) -> float:
@@ -107,7 +107,7 @@ class ShoppingList:
         """
         res = db.select_all(query)
         for item in res:
-            self.list.append(ShoppingItem(item['ingredient'], item['wanted_amount']))
+            self.list.append(ShoppingItem(item.ingredient, item.wanted_amount))
 
     def __add_critical(self):
         """
@@ -125,7 +125,7 @@ class ShoppingList:
         """
         res = db.select_all(query)
         for item in res:
-            item = ShoppingItem(item['id'])
+            item = ShoppingItem(item.id)
             item.create()
             if item not in self.list:
                 self.list.append(item)
@@ -144,6 +144,6 @@ class ShoppingList:
         """
         res = db.select_all(query)
         for item in res:
-            item = ShoppingItem(item['id'])
+            item = ShoppingItem(item.id)
             if item not in self.list:
                 self.suggested_list.append(item)
