@@ -6,7 +6,7 @@ from typing import Union
 class DoesNotExist(Exception):
     """When something does not exist"""
 
-    def __init__(self, what: object, identifier: str = '-', add_info: Union[None, str] = None):
+    def __init__(self, what: object, identifier: str = '-', add_info: Union[None, str] = None) -> None:
         """
         :param what:            The wanted object (uninitiated)
         :param identifier:      The identifier (primary key) for the object
@@ -27,7 +27,7 @@ class DoesNotExist(Exception):
 class AlreadyExists(Exception):
     """When something already exists"""
 
-    def __init__(self, what: object, relation: Union[object, None] = None):
+    def __init__(self, what: object, relation: Union[object, None] = None) -> None:
         """
         :param what:        An instance of an object that already exists
         :param relation:    If the object exists in relation to something else
@@ -43,7 +43,7 @@ class AlreadyExists(Exception):
 
 class MissingParameter(Exception):
     """When required parameter is missing for specific action"""
-    def __init__(self, parameter: str):
+    def __init__(self, parameter: str) -> None:
         """
         :param parameter:   Name of the parameter that is missing
         """
@@ -51,3 +51,7 @@ class MissingParameter(Exception):
 
     def __str__(self):
         return f'Error: Missing parameter {self.parameter}'
+
+
+class NotEnoughIngredients(Exception):
+    pass

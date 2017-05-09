@@ -12,8 +12,8 @@ class RecipeCategory:
     For recipe categorization
     """
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name: str) -> None:
+        self.name: str = name
 
     def __str__(self):
         return self.name
@@ -31,7 +31,7 @@ class RecipeCategory:
         res = db.select(query, self.name)
         return bool(res)
 
-    def create(self):
+    def create(self) -> None:
         """Creates the recipe category"""
         if self.exists():
             raise errors.AlreadyExists(self)
@@ -41,7 +41,7 @@ class RecipeCategory:
         """
         db.insert(query, self.name)
 
-    def delete(self):
+    def delete(self) -> None:
         """Deletes the recipe category"""
         if not self.exists():
             raise errors.DoesNotExist(RecipeCategory, identifier=self.name)
@@ -75,7 +75,7 @@ class Recipe:
             prepare_time: Union[int, None] = None,
             portions: Union[int, None] = None,
             new: bool = False
-    ):
+    ) -> None:
         """
         :param name:            Name of the recipe
         :param directions:      How to make it :)
@@ -107,7 +107,7 @@ class Recipe:
             price += ingredient.average_price * amount
         return price
 
-    def create(self):
+    def create(self) -> None:
         """Creates the recipe, has to be created before ingredients and categories are added!"""
         required_params = dict(portions=self.portions)
         for name, param in required_params:
@@ -119,7 +119,7 @@ class Recipe:
         """
         db.insert(query, self.name, self.directions, self.picture, self.prepare_time, self.portions)
 
-    def delete(self):
+    def delete(self) -> None:
         """Deletes the recipe"""
         query = """
         DELETE FROM recipe
@@ -127,7 +127,7 @@ class Recipe:
         """
         db.delete(query, self.name)
 
-    def add_ingredient(self, ingredient: Ingredient, amount: float):
+    def add_ingredient(self, ingredient: Ingredient, amount: float) -> None:
         """Adds an ingredient to the recipe"""
         if ingredient in self.ingredients.keys():
             raise errors.AlreadyExists(ingredient, relation=self)
@@ -135,20 +135,20 @@ class Recipe:
         INSERT INTO recipe_ingredients (recipe, ingredient, amount) 
         VALUES (%s, %s, %s)
         """
-        db.insert(query, self.name, ingredient._id, amount)
+        db.insert(query, self.name, ingredient.id, amount)
         self.ingredients[ingredient] = amount
 
-    def remove_ingredient(self, ingredient: Ingredient):
+    def remove_ingredient(self, ingredient: Ingredient) -> None:
         """Removes an ingredient from the recipe"""
         query = """
         DELETE FROM recipe_ingredients
         WHERE ingredient = %s 
         AND recipe = %s
         """
-        db.delete(query, ingredient._id, self.name)
+        db.delete(query, ingredient.id, self.name)
         self.ingredients.pop(ingredient, None)
 
-    def add_category(self, category: RecipeCategory):
+    def add_category(self, category: RecipeCategory) -> None:
         """Adds the recipe into a category"""
         if category in self.categories:
             raise errors.AlreadyExists(category, relation=self)
@@ -159,7 +159,7 @@ class Recipe:
         db.insert(query, self.name, category.name)
         self.categories.append(category)
 
-    def remove_category(self, category: RecipeCategory):
+    def remove_category(self, category: RecipeCategory) -> None:
         """Removes the recipe from a category"""
         query = """
         DELETE FROM categorized_recipes
@@ -168,14 +168,26 @@ class Recipe:
         """
         db.delete(query, self.name, category.name)
 
-    def cook(self):
+    def can_be_cooked(self) -> bool:
+        """Checks whether the recipe can be cooked"""
+        for ingredient, amount in self.ingredients:
+            if amount > ingredient.in_stock():
+                return False
+        return True
+
+    def cook(self) -> None:
+        """Adds the recipe the a log of cooked recipes and subtracts the ingredients from stock"""
+        if not self.can_be_cooked():
+            raise errors.NotEnoughIngredients
         query = """
         INSERT INTO recipe_made (recipe, portions, price) 
         VALUES (%s, %s, %s)
         """
         db.insert(query, self.name, self.portions, self.current_price)
+        for ingredient, amount in self.ingredients:
+            ingredient.remove_stock(amount)
 
-    def __load_from_db(self):
+    def __load_from_db(self) -> None:
         wanted_portions: Union[int, None] = self.portions
 
         query = """
@@ -201,7 +213,7 @@ class Recipe:
         """
         res = db.select_all(query_ingredients, self.name)
         for i in res:
-            ingredient = Ingredient(i.ingredient)
+            ingredient = Ingredient(ingredient_id=i.ingredient)
             adjusted_amount: float = i.amount * adjust_portion
             self.ingredients[ingredient] = adjusted_amount
         query_categories = """

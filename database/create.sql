@@ -33,6 +33,7 @@ COMMENT ON COLUMN ingredient.durability IS 'Days before the ingredient expires i
 
 CREATE TABLE stock
 (
+  id SERIAL PRIMARY KEY,
   ingredient INT NOT NULL,
   amount FLOAT NOT NULL,
   amount_left FLOAT NOT NULL,

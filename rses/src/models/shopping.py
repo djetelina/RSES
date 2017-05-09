@@ -9,8 +9,8 @@ from models.stock import Ingredient
 
 class ShoppingItem(Ingredient):
     """For displaying in shopping list"""
-    def __init__(self, id: int, amount: Union[float, None] = None):
-        super().__init__(id)
+    def __init__(self, id: int, amount: Union[float, None] = None) -> None:
+        super().__init__(ingredient_id=id)
         self._amount: Union[float, None] = amount
         self.current_price: Union[float, None] = None
         self.expiration_date: Union[datetime.date, None] = None
@@ -40,7 +40,7 @@ class ShoppingItem(Ingredient):
         return f'ShoppingItem(name:{self._name}, _amount:{self.amount}, current_price: {self.current_price}, ' \
                f'average_price:{self.average_price}, status:{self.status})'
 
-    def create(self):
+    def create(self) -> None:
         """Adds the item into the database of things to buy"""
         if self._amount is None:
             self._amount = self.amount
@@ -50,7 +50,7 @@ class ShoppingItem(Ingredient):
         """
         db.insert(query, self._id, self._amount)
 
-    def to_cart(self):
+    def to_cart(self) -> None:
         """Marks the item as in cart"""
         query = """
         UPDATE shopping_list
@@ -59,7 +59,7 @@ class ShoppingItem(Ingredient):
         """
         db.update(query, self._id)
 
-    def from_cart(self):
+    def from_cart(self) -> None:
         """Moves the item back from 'cart' to on-list"""
         query = """
         UPDATE shopping_list
@@ -68,7 +68,7 @@ class ShoppingItem(Ingredient):
         """
         db.update(query, self._id)
 
-    def purchase(self):
+    def purchase(self) -> None:
         """Adds the item to stock and deletes it from shopping list database"""
         query_insert = """
         INSERT INTO stock (ingredient, amount, amount_left, expiration_date, price)
@@ -100,7 +100,7 @@ class ShoppingList:
     def __repr__(self):
         return f'ShoppingList(list:{repr(self.list)}, suggested_list:{repr(self.suggested_list)})'
 
-    def __add_from_db_list(self):
+    def __add_from_db_list(self) -> None:
         query = """
         SELECT ingredient, wanted_amount
         FROM shopping_list
@@ -109,7 +109,7 @@ class ShoppingList:
         for item in res:
             self.list.append(ShoppingItem(item.ingredient, item.wanted_amount))
 
-    def __add_critical(self):
+    def __add_critical(self) -> None:
         """
         Adds items to the shopping list that are under the critical threshold to rebuy.
         
@@ -130,7 +130,7 @@ class ShoppingList:
             if item not in self.list:
                 self.list.append(item)
 
-    def __add_suggested(self):
+    def __add_suggested(self) -> None:
         """
         Suggests items for purchase, but does not add them to things to buy - this has to be done manually
         """

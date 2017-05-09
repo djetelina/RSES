@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class DatabaseAdapter:
     """More friendly adapter for the database, takes care of logging and abstracts the connection/cursor"""
 
-    def __init__(self, url: str = DATABASE_URL):
+    def __init__(self, url: str = DATABASE_URL) -> None:
         connection_data: ParseResult = urlparse(url)
         self.username: str = connection_data.username
         self.password: str = connection_data.password
@@ -74,7 +74,7 @@ class DatabaseAdapter:
             row_count = cur.rowcount
         return row_count
 
-    def insert(self, query: str, *args):
+    def insert(self, query: str, *args) -> None:
         """Wrapped execute around insert statement"""
         with self.cursor as cur:
             cur.execute(query, args)
