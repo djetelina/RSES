@@ -1,6 +1,6 @@
 # coding=utf-8
 """Objects related to cooking"""
-from typing import List, Union, Dict
+from typing import List, Optional, Dict
 
 import errors
 from connections import db
@@ -71,9 +71,9 @@ class Recipe:
             self,
             name: str,
             directions: str = '',
-            picture: Union[str, None] = None,
-            prepare_time: Union[int, None] = None,
-            portions: Union[int, None] = None,
+            picture: Optional[str] = None,
+            prepare_time: Optional[int] = None,
+            portions: Optional[int] = None,
             new: bool = False
     ) -> None:
         """
@@ -86,9 +86,9 @@ class Recipe:
         """
         self.name: str = name
         self.directions: str = directions
-        self.picture: Union[str, None] = picture
-        self.prepare_time: Union[int, None] = prepare_time
-        self.portions: Union[int, None] = portions
+        self.picture: Optional[str] = picture
+        self.prepare_time: Optional[int] = prepare_time
+        self.portions: Optional[int] = portions
         self.ingredients: Dict[Ingredient, float] = dict()
         self.categories: List[RecipeCategory] = list()
         if not new:
@@ -188,7 +188,7 @@ class Recipe:
             ingredient.remove_stock(amount)
 
     def __load_from_db(self) -> None:
-        wanted_portions: Union[int, None] = self.portions
+        wanted_portions: Optional[int] = self.portions
 
         query = """
         SELECT directions, picture, prepare_time, portions

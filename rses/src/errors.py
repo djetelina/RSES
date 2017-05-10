@@ -1,21 +1,21 @@
 # coding=utf-8
 """Errors"""
-from typing import Union
+from typing import Optional, Type
 
 
 class DoesNotExist(Exception):
     """When something does not exist"""
 
-    def __init__(self, what: object, identifier: str = '-', add_info: Union[None, str] = None) -> None:
+    def __init__(self, what: Type[object], identifier: str = '-', add_info: Optional[str] = None) -> None:
         """
         :param what:            The wanted object (uninitiated)
         :param identifier:      The identifier (primary key) for the object
         :param add_info:        Additional info
         """
         # We care about the name of the class itself
-        self.what: str = what.__name__
+        self.what: Type[object] = what.__name__
         self.identifier: str = identifier
-        self.add_info: Union[None, str] = add_info
+        self.add_info: Optional[str] = add_info
 
     def __str__(self):
         message = f'Error: {self.what} identified by {self.identifier} does not exist. '
@@ -27,13 +27,13 @@ class DoesNotExist(Exception):
 class AlreadyExists(Exception):
     """When something already exists"""
 
-    def __init__(self, what: object, relation: Union[object, None] = None) -> None:
+    def __init__(self, what: object, relation: Optional[object] = None) -> None:
         """
         :param what:        An instance of an object that already exists
         :param relation:    If the object exists in relation to something else
         """
         self.what: object = what
-        self.relation: Union[object, None] = relation
+        self.relation: Optional[object] = relation
 
     def __str__(self):
         if self.relation is not None:

@@ -1,7 +1,7 @@
 # coding=utf-8
 """Objects related to shopping"""
 from datetime import datetime
-from typing import Union
+from typing import Optional
 
 from connections import db
 from models.stock import Ingredient
@@ -9,11 +9,11 @@ from models.stock import Ingredient
 
 class ShoppingItem(Ingredient):
     """For displaying in shopping list"""
-    def __init__(self, id: int, amount: Union[float, None] = None) -> None:
+    def __init__(self, id: int, amount: Optional[float] = None) -> None:
         super().__init__(ingredient_id=id)
-        self._amount: Union[float, None] = amount
-        self.current_price: Union[float, None] = None
-        self.expiration_date: Union[datetime.date, None] = None
+        self._amount: Optional[float] = amount
+        self.current_price: Optional[float] = None
+        self.expiration_date: Optional[datetime.date] = None
 
     @property
     def status(self) -> str:

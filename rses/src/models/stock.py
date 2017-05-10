@@ -1,7 +1,7 @@
 # coding=utf-8
 """Objects related to ingredients and stock"""
 import logging
-from typing import Union, List, Any
+from typing import Optional, List, Any
 
 from psycopg2 import sql
 
@@ -13,10 +13,10 @@ log = logging.getLogger(__name__)
 
 class IngredientType:
     """For shopping list organization and filtering"""
-    def __init__(self, *, ingredient_type_id: Union[int, None]=None, name: Union[str, None]=None) -> None:
+    def __init__(self, *, ingredient_type_id: Optional[int]=None, name: Optional[str]=None) -> None:
         log.debug('Init of %s', repr(self))
-        self._id: Union[int, None] = ingredient_type_id
-        self._name: Union[str, None] = name
+        self._id: Optional[int] = ingredient_type_id
+        self._name: Optional[str] = name
         if not self._id:
             self.create()
         elif not self._name:
@@ -110,13 +110,13 @@ class Ingredient:
     """An ingredient to buy and use in recipes"""
     def __init__(
             self, *,
-            ingredient_id: Union[int, None]=None,
-            name: Union[str, None]=None,
-            unit: Union[str, None] = None,
-            ingredient_type: Union[IngredientType, None] = None,
-            suggestion_threshold: Union[float, None] = 0.0,
-            rebuy_threshold: Union[float, None] = 0.0,
-            durability: Union[int, None] = None
+            ingredient_id: Optional[int]=None,
+            name: Optional[str]=None,
+            unit: Optional[str] = None,
+            ingredient_type: Optional[IngredientType] = None,
+            suggestion_threshold: Optional[float] = 0.0,
+            rebuy_threshold: Optional[float] = 0.0,
+            durability: Optional[int] = None
     ) -> None:
         """
         :param ingredient_id:                      Identifier for an ingredient, assigned be the database on creation
@@ -127,13 +127,13 @@ class Ingredient:
         :param rebuy_threshold:         When the shopping system tells you to absolutely buy it next time you see it
         :param durability:              If specified, calculates the expiration date based on the date of purchase
         """
-        self._id: Union[int, None] = ingredient_id
+        self._id: Optional[int] = ingredient_id
         self._name: str = name
-        self._unit: Union[str, None] = unit
-        self._type: Union[IngredientType, None] = ingredient_type
-        self._suggestion_threshold: Union[float, None] = suggestion_threshold
-        self._rebuy_threshold: Union[float, None] = rebuy_threshold
-        self._durability: Union[int, None] = durability
+        self._unit: Optional[str] = unit
+        self._type: Optional[IngredientType] = ingredient_type
+        self._suggestion_threshold: Optional[float] = suggestion_threshold
+        self._rebuy_threshold: Optional[float] = rebuy_threshold
+        self._durability: Optional[int] = durability
         if not self._id:
             self.create()
         else:
