@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from connections import db
-from models.stock import Ingredient
+from objects.stock import Ingredient
 
 
 class ShoppingItem(Ingredient):

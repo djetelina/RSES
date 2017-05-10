@@ -4,7 +4,7 @@ from typing import List, Optional, Dict
 
 import errors
 from connections import db
-from models.stock import Ingredient
+from objects.stock import Ingredient
 
 
 class RecipeCategory:

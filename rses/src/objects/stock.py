@@ -10,13 +10,17 @@ from connections import db
 
 log = logging.getLogger(__name__)
 
+class IngredientMeta:
+    """Metaclass so that type annotations can work before it's defined, this is retarded."""
+    pass
+
 
 class IngredientType:
     """For shopping list organization and filtering"""
     def __init__(self, *, ingredient_type_id: Optional[int]=None, name: Optional[str]=None) -> None:
-        log.debug('Init of %s', repr(self))
         self._id: Optional[int] = ingredient_type_id
         self._name: Optional[str] = name
+        log.debug('Init of %s', repr(self))
         if not self._id:
             self.create()
         elif not self._name:
@@ -38,7 +42,7 @@ class IngredientType:
 
     @name.setter
     def name(self, new_name: str):
-        log.debug("Updating name of %, new name: %s", str(self), new_name)
+        log.debug("Updating name of %s, new name: %s", str(self), new_name)
         query = """
         UPDATE ingredient_type
         SET name = %s
@@ -55,6 +59,10 @@ class IngredientType:
         WHERE name = %s
         """
         res = db.select(query, self._name)
+        if res:
+            log.debug('%s was found in the database', self._name)
+        else:
+            log.debug('%s was not found in the database', self._name)
         return bool(res)
 
     def create(self):
@@ -62,10 +70,12 @@ class IngredientType:
         log.debug('Trying to create new %s', str(self))
         if self.exists() or self._id:
             raise errors.AlreadyExists(self)
+        if self._name is None:
+            raise errors.MissingParameter('name')
         query = """
-        INSERT INTO ingredient_type (name)
-        VALUES (%s)
-        RETURNING id
+        INSERT INTO ingredient_type (id, name)
+        VALUES (DEFAULT, %s)
+        RETURNING *
         """
         self._id = db.insert(query, self._name).id
         log.debug('Created, new id: %s', self.id)
@@ -81,7 +91,7 @@ class IngredientType:
         """
         db.delete(query, self._id)
 
-    def items(self) -> List[Ingredient]:
+    def items(self) -> List[IngredientMeta]:
         """All ingredients of this type"""
         log.debug('Getting all ingredients of %s', str(self))
         query = """
@@ -112,11 +122,11 @@ class Ingredient:
             self, *,
             ingredient_id: Optional[int]=None,
             name: Optional[str]=None,
-            unit: Optional[str] = None,
-            ingredient_type: Optional[IngredientType] = None,
-            suggestion_threshold: Optional[float] = 0.0,
-            rebuy_threshold: Optional[float] = 0.0,
-            durability: Optional[int] = None
+            unit: Optional[str]=None,
+            ingredient_type: Optional[IngredientType]=None,
+            suggestion_threshold: Optional[float]=0.0,
+            rebuy_threshold: Optional[float]=0.0,
+            durability: Optional[int]=None
     ) -> None:
         """
         :param ingredient_id:                      Identifier for an ingredient, assigned be the database on creation

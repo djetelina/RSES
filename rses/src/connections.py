@@ -1,7 +1,7 @@
 # coding=utf-8
 """Connections"""
 import logging
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Optional
 from urllib.parse import urlparse, ParseResult
 
 import psycopg2
@@ -40,8 +40,8 @@ class DatabaseAdapter:
             cursor_factory=psycopg2.extras.NamedTupleCursor
         )
         conn.autocommit = True
-        log.debug("Connection made to host: %s, database: %s. Server version: %s, server encoding: %s",
-                  self.hostname, self.database, conn.server_version, conn.encoding)
+        # log.debug("Connection made to host: %s, database: %s. Server version: %s, server encoding: %s",
+        #           self.hostname, self.database, conn.server_version, conn.encoding)
         return conn
 
     @property
@@ -74,11 +74,13 @@ class DatabaseAdapter:
             row_count = cur.rowcount
         return row_count
 
-    def insert(self, query: str, *args) -> None:
+    def insert(self, query: str, *args) -> Optional[NamedTuple]:
         """Wrapped execute around insert statement"""
         with self.cursor as cur:
             cur.execute(query, args)
-            log.debug("Ran insert query\n'%s'", _query_for_log(cur.query))
+            result = cur.fetchone()
+            log.debug("Ran insert query\n'%s'\nReturning: %s", _query_for_log(cur.query), result)
+        return result
 
     def update(self, query: str, *args) -> int:
         """Wrapped execute around update statement"""
