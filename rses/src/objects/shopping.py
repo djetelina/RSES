@@ -1,10 +1,13 @@
 # coding=utf-8
 """Objects related to shopping"""
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
+import logging
 
 from connections import db
 from objects.stock import Ingredient
+
+log = logging.getLogger(__name__)
 
 
 class ShoppingItem(Ingredient):
@@ -30,11 +33,12 @@ class ShoppingItem(Ingredient):
     def amount(self) -> float:
         """How many units of this ingredient should be bought"""
         if self._amount is None:
+            log.debug('Unknown amount of %s to buy, using suggestion threshold + 1', self.name)
             return self._suggestion_threshold + 1.0
         return self._amount
 
     def __str__(self):
-        return f'{self.amount}x {self._unit} {self._name}'
+        return f'{self.amount}x {self._unit} {self._name} for {self.current_price}'
 
     def __repr__(self):
         return f'ShoppingItem(name:{self._name}, _amount:{self.amount}, current_price: {self.current_price}, ' \
@@ -42,6 +46,7 @@ class ShoppingItem(Ingredient):
 
     def create(self) -> None:
         """Adds the item into the database of things to buy"""
+        log.debug('Trying to create new %s', str(self))
         if self._amount is None:
             self._amount = self.amount
         query = """
@@ -70,6 +75,7 @@ class ShoppingItem(Ingredient):
 
     def purchase(self) -> None:
         """Adds the item to stock and deletes it from shopping list database"""
+        log.debug('Purchasing %s', str(self))
         query_insert = """
         INSERT INTO stock (ingredient, amount, amount_left, expiration_date, price)
         VALUES (%s, %s, %s, %s, %s)
@@ -82,16 +88,18 @@ class ShoppingItem(Ingredient):
         db.delete(query_delete, self._id)
 
     def __eq__(self, other):
-        return self._id == other._id and self._name == other._name
+        return self._name == other.name
 
 
 class ShoppingList:
     """Shopping list that fills itself and is ready for serving"""
     def __init__(self):
-        self.list = list()
-        self.suggested_list = list()
+        self.list: List[ShoppingItem] = list()
+        self.suggested_list: List[ShoppingItem] = list()
+        log.debug('Filling shopping list')
         self.__add_from_db_list()
         self.__add_critical()
+        log.debug('Filling suggestion list')
         self.__add_suggested()
 
     def __str__(self):
@@ -107,7 +115,9 @@ class ShoppingList:
         """
         res = db.select_all(query)
         for item in res:
-            self.list.append(ShoppingItem(item.ingredient, item.wanted_amount))
+            item = ShoppingItem(item.ingredient, item.wanted_amount)
+            log.debug('Adding %s from database', item)
+            self.list.append(item)
 
     def __add_critical(self) -> None:
         """
@@ -126,8 +136,9 @@ class ShoppingList:
         res = db.select_all(query)
         for item in res:
             item = ShoppingItem(item.id)
-            item.create()
             if item not in self.list:
+                item.create()
+                log.debug('Adding %s from items below rebuy threshold', item)
                 self.list.append(item)
 
     def __add_suggested(self) -> None:
@@ -146,4 +157,5 @@ class ShoppingList:
         for item in res:
             item = ShoppingItem(item.id)
             if item not in self.list:
+                log.debug('Suggesting %s from items below suggestion threshold', item)
                 self.suggested_list.append(item)

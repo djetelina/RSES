@@ -56,13 +56,14 @@ COMMENT ON COLUMN recipe.prepare_time IS 'Time in minutes';
 
 CREATE TABLE recipe_category
 (
-  id VARCHAR(20) PRIMARY KEY
+  id   SERIAL UNIQUE,
+  name VARCHAR(20) PRIMARY KEY
 );
 
 CREATE TABLE categorized_recipes
 (
   recipe VARCHAR(60),
-  category VARCHAR(20),
+  category INT,
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
   FOREIGN KEY (category) REFERENCES recipe_category (id) ON DELETE CASCADE,
   PRIMARY KEY (recipe, category)

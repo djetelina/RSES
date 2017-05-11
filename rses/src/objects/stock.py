@@ -10,6 +10,7 @@ from connections import db
 
 log = logging.getLogger(__name__)
 
+
 class IngredientMeta:
     """Metaclass so that type annotations can work before it's defined, this is retarded."""
     pass
@@ -20,7 +21,6 @@ class IngredientType:
     def __init__(self, *, ingredient_type_id: Optional[int]=None, name: Optional[str]=None) -> None:
         self._id: Optional[int] = ingredient_type_id
         self._name: Optional[str] = name
-        log.debug('Init of %s', repr(self))
         if not self._id:
             self.create()
         elif not self._name:
@@ -34,10 +34,12 @@ class IngredientType:
 
     @property
     def id(self) -> int:
+        """Id of the ingredient type in the database, cannot be modified"""
         return self._id
 
     @property
     def name(self) -> str:
+        """Name of the ingredient type as shown the the user"""
         return self._name
 
     @name.setter
@@ -129,7 +131,7 @@ class Ingredient:
             durability: Optional[int]=None
     ) -> None:
         """
-        :param ingredient_id:                      Identifier for an ingredient, assigned be the database on creation
+        :param ingredient_id            Identifier for an ingredient, assigned be the database on creation
         :param name:                    The name of the ingredient, as will be display everywhere
         :param unit:                    The measurable unit of the ingredient, can be virtually anything
         :param ingredient_type:         The type if ingredient that the item belongs to
@@ -151,10 +153,12 @@ class Ingredient:
 
     @property
     def id(self) -> int:
+        """Id of the ingredient in the databse, cannot be modified"""
         return self._id
 
     @property
     def name(self) -> str:
+        """Name of the ingredient as shown the the user"""
         return self._name
 
     @name.setter
@@ -163,6 +167,7 @@ class Ingredient:
 
     @property
     def unit(self) -> str:
+        """Unit in which the ingredient is measured - not only in recipes, but also in shopping lists"""
         return self._unit
 
     @unit.setter
@@ -171,6 +176,7 @@ class Ingredient:
 
     @property
     def type(self) -> IngredientType:
+        """Type of the ingredient, foreign key to Ingredient Type in the database"""
         return self._type
 
     @type.setter
@@ -180,6 +186,7 @@ class Ingredient:
 
     @property
     def suggestion_threshold(self) -> float:
+        """Threshold, at which shopping list will suggest buying"""
         return self._suggestion_threshold
 
     @suggestion_threshold.setter
@@ -188,6 +195,7 @@ class Ingredient:
 
     @property
     def rebuy_threshold(self) -> float:
+        """Threshold, at which shopping list will add it as 'to buy'"""
         return self._suggestion_threshold
 
     @rebuy_threshold.setter
@@ -196,6 +204,7 @@ class Ingredient:
 
     @property
     def durability(self) -> int:
+        """If no expiration date was set in the stock table, how many days can this usually last to calculate it"""
         return self._durability
 
     @durability.setter
@@ -214,11 +223,26 @@ class Ingredient:
         """
         return db.select(query, self._name).average
 
+    @property
+    def in_stock(self) -> float:
+        """
+        Counts total of amount left in table stock for ingredient
+        
+        :return:    How much is left in stock
+        """
+        query = """
+        SELECT count(amount_left) AS amount
+        FROM stock
+        WHERE ingredient = %s
+        """
+        res = db.select(query, self._id)
+        return res.amount
+
     def __str__(self):
-        return self._name
+        return f'Ingredient {self._name}'
 
     def __repr__(self):
-        return f'Ingredient(name={self._name}, unit={self._unit}, type={repr(self._type)}, ' \
+        return f'Ingredient(id={self._id}, name={self._name}, unit={self._unit}, type={repr(self._type)}, ' \
                f'suggestion_threshold={self._suggestion_threshold}, rebuy_threshold={self._rebuy_threshold}'
 
     def exists(self) -> bool:
@@ -231,6 +255,10 @@ class Ingredient:
         WHERE name = %s
         """
         res = db.select(query, self._name)
+        if res:
+            log.debug('%s was found in the database', self._name)
+        else:
+            log.debug('%s was not found in the database', self._name)
         return bool(res)
 
     def create(self):
@@ -239,6 +267,7 @@ class Ingredient:
         
         Default thresholds are 0 and no durability is set.
         """
+        log.debug('Trying to create new %s', str(self))
         required_params = dict(type=self._type, unit=self._unit)
         for name, param in required_params:
             if param is None:
@@ -251,9 +280,11 @@ class Ingredient:
         RETURNING id"""
         self._id = db.insert(query, self._name, self._unit, self._type.id, self._suggestion_threshold,
                              self._rebuy_threshold, self._durability).id
+        log.debug('Created, new id: %s', self._id)
 
     def remove_stock(self, amount: float) -> None:
         """Removes amount of ingredient from the stock, from the oldest"""
+        log.debug('Removing %s%s of %s from stock', amount, self._unit, str(self))
         query_select = """
         SELECT id, amount_left
         FROM stock
@@ -272,21 +303,8 @@ class Ingredient:
         amount -= can_remove
         # FIXME > instead of != in case an error happened somewhere, after testing this, it can be replaced
         if amount > 0:
+            log.debug('There is still %s%s left to remove, calling recursively', amount, self._unit)
             self.remove_stock(amount)
-
-    def in_stock(self) -> float:
-        """
-        Counts total of amount left in table stock for ingredient
-        
-        :return:    How much is left in stock
-        """
-        query = """
-        SELECT count(amount_left) AS amount
-        FROM stock
-        WHERE ingredient = %s
-        """
-        res = db.select(query, self._id)
-        return res.amount
 
     def __updater(self, column, new_value) -> Any:
         """Updates the Ingredient entry's value for specified column"""
@@ -298,7 +316,6 @@ class Ingredient:
         """).format(sql.Identifier(column))
         db.update(query, new_value, self._id)
         return new_value
-
 
     def __load_from_db(self):
         """Loads the ingredient from the database"""

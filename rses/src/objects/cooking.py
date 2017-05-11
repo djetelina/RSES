@@ -1,10 +1,18 @@
 # coding=utf-8
 """Objects related to cooking"""
 from typing import List, Optional, Dict
+import logging
 
 import errors
 from connections import db
 from objects.stock import Ingredient
+
+log = logging.getLogger(__name__)
+
+
+class RecipeMeta:
+    """Same as fucking ingredient, I HATE THIS"""
+    pass
 
 
 class RecipeCategory:
@@ -12,60 +20,97 @@ class RecipeCategory:
     For recipe categorization
     """
 
-    def __init__(self, name: str) -> None:
-        self.name: str = name
+    def __init__(self, *, recipe_category_id: Optional[int] = None, name: Optional[str] = None) -> None:
+        self._id: Optional[int] = recipe_category_id
+        self._name: Optional[str] = name
+        if not self._id:
+            self.create()
+        elif not self._name:
+            self.__load_from_db()
 
     def __str__(self):
-        return self.name
+        return f'Recipe Category {self._name}'
 
     def __repr__(self):
-        return f'RecipeCategory(name={self.name})'
+        return f'RecipeCategory(id={self._id}, name={self._name})'
+
+    @property
+    def id(self) -> int:
+        """Id of the recipe category in the database, cannot be changed"""
+        return self._id
+
+    @property
+    def name(self) -> str:
+        """Name of the recipe category"""
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        log.debug("Updating name of %s, new name: %s", str(self), new_name)
+        query = """
+        UPDATE recipe_category
+        SET name = %s
+        WHERE id = %s
+        """
+        db.update(query, new_name, self._id)
+        self._name = new_name
 
     def exists(self) -> bool:
         """Checks whether the recipe category exists"""
         query = """
         SELECT * 
         FROM recipe_category
-        WHERE id = %s
+        WHERE name = %s
         """
-        res = db.select(query, self.name)
+        res = db.select(query, self._name)
+        if res:
+            log.debug('%s was found in the database', self._name)
+        else:
+            log.debug('%s was not found in the database', self._name)
         return bool(res)
 
     def create(self) -> None:
         """Creates the recipe category"""
-        if self.exists():
+        if self.exists() or self._id:
             raise errors.AlreadyExists(self)
+        if self._name is None:
+            raise errors.MissingParameter('name')
         query = """
-        INSERT INTO recipe_category (id)
-        VALUES (%s)
+        INSERT INTO recipe_category (id, name)
+        VALUES (DEFAULT, %s)
+        RETURNING *
         """
-        db.insert(query, self.name)
+        self._id = db.insert(query, self._name).id
+        log.debug('Created, new id: %s', self.id)
 
     def delete(self) -> None:
         """Deletes the recipe category"""
         if not self.exists():
-            raise errors.DoesNotExist(RecipeCategory, identifier=self.name)
+            raise errors.DoesNotExist(RecipeCategory, identifier=self._name)
         query = """
         DELETE FROM recipe_category
         WHERE id = %s
         """
-        db.delete(query, self.name)
+        db.delete(query, self._id)
 
-    def items(self) -> List[Ingredient]:
+    def items(self) -> List[RecipeMeta]:
         """All ingredients of this type"""
         query = """
         SELECT recipe
         FROM categorized_recipes
         WHERE category = %s
         """
-        res = db.select_all(query, self.name)
+        res = db.select_all(query, self._id)
         recipes = list()
         for item in res:
             recipes.append(Recipe(item.id))
         return recipes
 
+    def __load_from_db(self):
+        pass
 
-class Recipe:
+
+class Recipe(RecipeMeta):
     """A recipe object"""
     def __init__(
             self,
@@ -156,7 +201,7 @@ class Recipe:
         INSERT INTO categorized_recipes (recipe, category) 
         VALUES (%s, %s)
         """
-        db.insert(query, self.name, category.name)
+        db.insert(query, self.name, category.id)
         self.categories.append(category)
 
     def remove_category(self, category: RecipeCategory) -> None:
@@ -166,12 +211,12 @@ class Recipe:
         WHERE recipe = %s
         AND category = %s
         """
-        db.delete(query, self.name, category.name)
+        db.delete(query, self.name, category.id)
 
     def can_be_cooked(self) -> bool:
         """Checks whether the recipe can be cooked"""
         for ingredient, amount in self.ingredients:
-            if amount > ingredient.in_stock():
+            if amount > ingredient.in_stock:
                 return False
         return True
 
