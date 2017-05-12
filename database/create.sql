@@ -46,7 +46,8 @@ COMMENT ON TABLE stock IS 'Stock of ingredients';
 
 CREATE TABLE recipe
 (
-  id           VARCHAR(60) PRIMARY KEY,
+  id           SERIAL UNIQUE,
+  name         VARCHAR(60) PRIMARY KEY,
   directions   TEXT NOT NULL,
   picture      VARCHAR(250),
   prepare_time INT,
@@ -62,7 +63,7 @@ CREATE TABLE recipe_category
 
 CREATE TABLE categorized_recipes
 (
-  recipe VARCHAR(60),
+  recipe INT,
   category INT,
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
   FOREIGN KEY (category) REFERENCES recipe_category (id) ON DELETE CASCADE,
@@ -72,7 +73,7 @@ COMMENT ON TABLE categorized_recipes IS 'What categories does a recipe belong to
 
 CREATE TABLE recipe_ingredients
 (
-  recipe VARCHAR(60),
+  recipe INT,
   ingredient INT,
   amount FLOAT NOT NULL,
   FOREIGN KEY (recipe) REFERENCES recipe (id) ON DELETE CASCADE,
@@ -83,7 +84,7 @@ COMMENT ON TABLE recipe_ingredients IS 'Ingredients for a recipe';
 
 CREATE TABLE recipe_made
 (
-  recipe    VARCHAR(60),
+  recipe    INT,
   time_made TIMESTAMP DEFAULT NOW(),
   portions  INT   NOT NULL,
   price     FLOAT NOT NULL,

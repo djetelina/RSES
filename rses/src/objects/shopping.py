@@ -93,7 +93,7 @@ class ShoppingItem(Ingredient):
 
 class ShoppingList:
     """Shopping list that fills itself and is ready for serving"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.list: List[ShoppingItem] = list()
         self.suggested_list: List[ShoppingItem] = list()
         log.debug('Filling shopping list')

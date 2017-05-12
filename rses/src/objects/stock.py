@@ -11,11 +11,6 @@ from connections import db
 log = logging.getLogger(__name__)
 
 
-class IngredientMeta:
-    """Metaclass so that type annotations can work before it's defined, this is retarded."""
-    pass
-
-
 class IngredientType:
     """For shopping list organization and filtering"""
     def __init__(self, *, ingredient_type_id: Optional[int]=None, name: Optional[str]=None) -> None:
@@ -93,7 +88,7 @@ class IngredientType:
         """
         db.delete(query, self._id)
 
-    def items(self) -> List[IngredientMeta]:
+    def items(self) -> List['Ingredient']:
         """All ingredients of this type"""
         log.debug('Getting all ingredients of %s', str(self))
         query = """
@@ -162,7 +157,7 @@ class Ingredient:
         return self._name
 
     @name.setter
-    def name(self, new_name):
+    def name(self, new_name: str):
         self._name = self.__updater('name', new_name)
 
     @property
@@ -171,7 +166,7 @@ class Ingredient:
         return self._unit
 
     @unit.setter
-    def unit(self, new_unit):
+    def unit(self, new_unit: str):
         self._unit = self.__updater('unit', new_unit)
 
     @property
@@ -190,7 +185,7 @@ class Ingredient:
         return self._suggestion_threshold
 
     @suggestion_threshold.setter
-    def suggestion_threshold(self, new_threshold):
+    def suggestion_threshold(self, new_threshold: float):
         self._suggestion_threshold = self.__updater('suggestion_threshold', new_threshold)
 
     @property
@@ -199,7 +194,7 @@ class Ingredient:
         return self._suggestion_threshold
 
     @rebuy_threshold.setter
-    def rebuy_threshold(self, new_threshold):
+    def rebuy_threshold(self, new_threshold: float):
         self._rebuy_threshold = self.__updater('rebuy_threshold', new_threshold)
 
     @property
@@ -208,7 +203,7 @@ class Ingredient:
         return self._durability
 
     @durability.setter
-    def durability(self, new_durability):
+    def durability(self, new_durability: int):
         self._durability = self.__updater('durability', new_durability)
 
     @property
@@ -306,7 +301,7 @@ class Ingredient:
             log.debug('There is still %s%s left to remove, calling recursively', amount, self._unit)
             self.remove_stock(amount)
 
-    def __updater(self, column, new_value) -> Any:
+    def __updater(self, column: str, new_value: Any) -> Any:
         """Updates the Ingredient entry's value for specified column"""
         log.debug('Updating ingredient column %s from %s to %s', column, getattr(self, 'column'), new_value)
         query = sql.SQL("""
