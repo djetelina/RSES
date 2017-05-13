@@ -104,7 +104,13 @@ class RecipeCategory:
         return recipes
 
     def __load_from_db(self):
-        pass
+        """Loads recipe category from database"""
+        query = """
+        SELECT name
+        FROM recipe_category
+        WHERE id = %s"""
+        res = db.select(query, self._id)
+        self._name = res.name
 
 
 class Recipe:
@@ -198,7 +204,7 @@ class Recipe:
     @wanted_portions.setter
     def wanted_portions(self, new_amount: int):
         new_ratio: float = self._wanted_portions / new_amount
-        self._wanted_portions = new_amount
+        self._wanted_portions: int = new_amount
         for ingredient, amount in self.ingredients.items():
             self.ingredients[ingredient] = amount * new_ratio
 
@@ -217,10 +223,10 @@ class Recipe:
 
     def create(self) -> None:
         """Creates the recipe, has to be created before ingredients and categories are added!"""
-        required_params = dict(portions=self._portions)
-        for name, param in required_params:
+        required_params = dict(portions=self._portions, name=self._name)
+        for name, param in required_params.items():
             if param is None:
-                errors.MissingParameter(name)
+                raise errors.MissingParameter(name)
         query = """
         INSERT INTO recipe (name, directions, picture, prepare_time, portions) 
         VALUES (%s, %s, %s, %s, %s)
@@ -278,7 +284,7 @@ class Recipe:
 
     def can_be_cooked(self) -> bool:
         """Checks whether the recipe can be cooked"""
-        for ingredient, amount in self.ingredients:
+        for ingredient, amount in self.ingredients.items():
             if amount > ingredient.in_stock:
                 return False
         return True
@@ -292,10 +298,11 @@ class Recipe:
         VALUES (%s, %s, %s)
         """
         db.insert(query, self._id, self._portions, self.current_price)
-        for ingredient, amount in self.ingredients:
+        for ingredient, amount in self.ingredients.items():
             ingredient.remove_stock(amount)
 
     def __load_from_db(self) -> None:
+        """Loads the recipe, it's ingredients and categories from the database"""
         query = """
         SELECT name, directions, picture, prepare_time, portions
         FROM recipe
