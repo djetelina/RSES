@@ -112,6 +112,10 @@ class IngredientType:
         res = db.select(query, self._id)
         self._name = res.name
 
+    @property
+    def json_dict(self):
+        return dict(id=self.id, name=self.name)
+
 
 class Ingredient:
     """An ingredient to buy and use in recipes"""
