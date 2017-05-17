@@ -1,28 +1,31 @@
 {% extends "base.html" %}
 {% block title %} - Authorization required{% endblock %}
 {% block content %}
-    <div class="container"></div>
+    <div class="container">
         {%- for category, message in get_flashed_messages(with_categories = true) %}
             <div class="alert alert-danger alert-dismissable">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 {{ message }}
             </div>
         {%- endfor %}
-    <div class="col-md-6 col-md-offset-3">
-        <form method="POST" action="{{ url_for('authorize') }}" class="form-horizontal">
-            <fieldset>
-                <div class="form-group">
-                    <label for="password" class="col-lg-3 control-label">
-                        Master password
-                    </label>
-                    <div class="col-lg-9">
-                        <input type="password" name="password" placeholder="very_secret, much wow" class="form-control">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-block">Send</button>
-                </div>
-            </fieldset>
-        </form>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 jumbotron">
+                <form method="POST" action="{{ url_for('authorize') }}" class="form-horizontal">
+                    <fieldset>
+                        <div class="form-group">
+                            <label for="password" class="col-lg-3 control-label">
+                                Master password
+                            </label>
+                            <div class="col-lg-9">
+                                <input type="password" name="password" placeholder="very_secret, much wow" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Enter</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}

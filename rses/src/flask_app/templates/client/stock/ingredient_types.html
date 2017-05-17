@@ -1,0 +1,28 @@
+{% extends "client/client_base.html" %}
+{% block title %} - Stock - Ingredient Types{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-2">
+            <h1>Ingredient Types</h1>
+        </div>
+        <div class="pull-right col-xs-1">
+            <h2 id="ingredient-type-total">Total: </h2>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Ingredient type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ingredient-types-table">
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    <script src="{{ url_for('RSES_CLIENT.static', filename='js/ingredient_type.js') }}"></script>
+{% endblock %}

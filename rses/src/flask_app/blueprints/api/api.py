@@ -45,3 +45,15 @@ def ingredient_type_rename(ingredient_type_id: int, new_name: str):
     ingredient_type = stock.IngredientType(ingredient_type_id=ingredient_type_id)
     ingredient_type.name = new_name
     return json.jsonify(dict(status='OK', new_name=ingredient_type.name)), 200
+
+
+@rses_api_bp.route('/list/ingredient_type/<int:limit>/<int:offset>', methods=['GET'])
+def list_ingredient_types(limit: int, offset: int):
+    listing = stock.IngredientTypeListing().show(limit, offset)
+    return json.jsonify(dict(status='OK', ingredient_types=listing))
+
+
+@rses_api_bp.route('/list/total/ingredient_type', methods=['GET'])
+def total_ingredient_types():
+    total = stock.IngredientTypeListing().total
+    return json.jsonify(dict(status='OK', total=total))

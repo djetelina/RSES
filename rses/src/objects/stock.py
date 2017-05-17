@@ -329,3 +329,25 @@ class Ingredient:
         self._suggestion_threshold = res.suggestion_threshold
         self._rebuy_threshold = res.rebuy_threshold
         self._durability = res.durability
+
+
+class IngredientTypeListing:
+
+    @property
+    def total(self) -> int:
+        query = """
+        SELECT COUNT(*) AS total
+        FROM ingredient_type
+        """
+        return db.select(query).total
+
+    def show(self, limit: int=50, offset: int=0):
+        query ="""
+        SELECT id, name
+        FROM ingredient_type
+        ORDER BY id ASC
+        LIMIT %s
+        OFFSET %s
+        """
+        res = db.select_all(query, limit, offset)
+        return [IngredientType(ingredient_type_id=item.id, name=item.name).json_dict for item in res]

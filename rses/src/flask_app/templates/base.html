@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/font-awesome.min.css') }}">
         <link href="https://fonts.googleapis.com/css?family=Lobster&amp;subset=latin-ext" rel="stylesheet">
         <style>
-            body, h1, h2, h3, h4, h5 {
+            body, h1, h2, h3, h4, h5, .btn {
                 font-family: 'Lobster', cursive;
             }
         </style>
@@ -16,7 +16,7 @@
 </head>
 <body>
     {% block navbar %}
-        <div class="navbar navbar-static-top navbar-inverse container">
+        <div class="navbar navbar-static-top navbar-inverse container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
                     <span class="icon-bar"></span>
@@ -25,16 +25,9 @@
                 </button>
                 <a class="navbar-brand" href="{{ url_for('RSES_CLIENT.home') }}">RSES</a>
             </div>
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul class="nav navbar-nav">
-                    <li {% if request.path == '/' %}class="active"{% endif %}>
-                        <a href="{{ url_for('RSES_CLIENT.home') }}">Home</a>
-                    </li>
-                </ul>
-            </div>
         </div>
     {% endblock %}
-    <div class="container page">
+    <div class="container-fluid page">
         <div class="content container-fluid">
             {%- for category, message in get_flashed_messages(with_categories = true) %}
                 <div class="alert alert-danger">
@@ -50,7 +43,7 @@
         {% block footer %}
             <footer class="footer">
                 <p>
-                    &copy; David Jetelina 2017
+                    &copy; David Jetelina & Kateřina Fialková 2017
                     <span class="pull-right">
                         For private use only!
                     </span>
@@ -59,7 +52,9 @@
         {% endblock %}
     </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+{% block js_footer %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+{% endblock %}
 </body>
 </html>

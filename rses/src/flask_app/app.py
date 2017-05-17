@@ -2,9 +2,9 @@
 """Flask app, just imports the otherwise modular blueprints and takes care of basic auth"""
 from functools import wraps
 
-from flask import Flask, session, request, abort, url_for, redirect, render_template, flash
+from flask import Flask, session, request, url_for, redirect, render_template, flash
 
-from blueprints.api.api import rses_api_bp
+from flask_app.blueprints.api.api import rses_api_bp
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -31,7 +31,7 @@ def before_request():
         return redirect(url_for('authorize'))
 
 
-@app.route('/authorize', methods=['GET', 'POST'])
+@app.route('/rses/authorize', methods=['GET', 'POST'])
 @public
 def authorize():
     """Very basic authorization"""
@@ -48,7 +48,7 @@ def authorize():
 
 # Registering stuff based on if web client is wanted
 if app.config['RSES_WEB_CLIENT']:
-    from blueprints.client.client import rses_web_client_bp
+    from flask_app.blueprints.client.client import rses_web_client_bp
     app.register_blueprint(rses_web_client_bp)
 else:
     # Redirect root url to API index if not running web client
