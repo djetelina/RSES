@@ -1,8 +1,9 @@
 # coding=utf-8
-from flask import Blueprint, json, current_app, url_for
+"""API for more than just one client"""
+from flask import Blueprint, json, current_app
 from objects import stock
 
-rses_api_bp = Blueprint('RSES', __name__, url_prefix='/rses/api')
+rses_api_bp = Blueprint('RSES_API', __name__, url_prefix='/rses/api')
 
 
 @rses_api_bp.route('/')
