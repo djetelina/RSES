@@ -17,11 +17,11 @@
                 {% elif request.path == item["url"] %}
                 class="active"
                 {% endif %}>
-                    <a {% if item["children"] %}
-                        class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);"
+                    {% if item["children"] %}
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);">
                     {% else %}
-                        href="{{ url_for("RSES_CLIENT." + item["function_name"]) }}"
-                    {% endif %}>
+                        <a href="{{ url_for("RSES_CLIENT." + item["function_name"]) }}">
+                    {% endif %}
                         {{ item["title"] }}
                         {% if item["children"] %}<span class="caret"></span>{% endif %}
                     </a>

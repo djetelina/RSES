@@ -2,19 +2,22 @@
 {% block title %} - Stock - Ingredient Types{% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-xs-2">
+        <div class="col-xs-6">
             <h1>Ingredient Types</h1>
         </div>
-        <div class="pull-right col-xs-1">
-            <h2 id="ingredient-type-total">Total: </h2>
+        <div class="text-right col-xs-6">
+            <h2>Total: <span id="ingredient-type-total"></span></h2>
         </div>
     </div>
-    <div class="row">
-        <table class="table table-hover">
+    <div class="row jumbotron">
+        <table class="table table-striped table-responsive">
             <thead>
                 <tr>
-                    <th>Ingredient type</th>
-                    <th>Actions</th>
+                    <th width="90%">
+                        Ingredient type
+                        <i class="fa fa-plus-circle text-success" aria-hidden="true"></i>
+                    </th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody id="ingredient-types-table">
