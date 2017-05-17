@@ -7,9 +7,14 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/font-awesome.min.css') }}">
         <link href="https://fonts.googleapis.com/css?family=Lobster&amp;subset=latin-ext" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Cabin&amp;subset=latin-ext" rel="stylesheet">
         <style>
-            body, h1, h2, h3, h4, h5, .btn {
+            h1, h2, h3, h4, h5, th, .rses-ab-heading {
                 font-family: 'Lobster', cursive;
+            }
+
+            body, .btn {
+                font-family: 'Cabin', sans-serif;
             }
 
             th {
@@ -28,6 +33,14 @@
                 font-size: 2.1rem;
             }
 
+            .alert {
+                font-size: 2.0rem;
+            }
+
+            .close {
+                font-size: 3.0rem;
+            }
+
             .navbar-nav {
                 font-size: 1.7rem;
             }
@@ -35,6 +48,32 @@
             .dropdown-menu {
                 font-size: 1.5rem;
             }
+
+            .rses-ab-table {
+                font-size: 1.2em;
+                padding: 0 5px;
+            }
+
+            .rses-ab-heading {
+                font-size: 2.3rem;
+                padding-left: 8px;
+            }
+
+            .rses-ab-s:hover, .rses-ab-s:active {
+                cursor: pointer;
+                text-shadow: 0 1px 5px lightgreen;
+            }
+
+            .rses-ab-d:hover, .rses-ab-d:active {
+                cursor: pointer;
+                text-shadow: 0 1px 5px lightcoral;
+            }
+
+            .rses-ab-i:hover, .rses-ab-i:active {
+                cursor: pointer;
+                text-shadow: 0 1px 5px lightblue;
+            }
+
         </style>
     {% endblock %}
 </head>
@@ -53,12 +92,14 @@
     {% endblock %}
     <div class="container-fluid page">
         <div class="content container-fluid">
-            {%- for category, message in get_flashed_messages(with_categories = true) %}
-                <div class="alert alert-danger">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    {{ message }}
-                </div>
-            {%- endfor %}
+            <div id="alerts">
+                {%- for category, message in get_flashed_messages(with_categories = true) %}
+                    <div class="alert alert-danger">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        {{ message }}
+                    </div>
+                {%- endfor %}
+            </div>
 
         {% block content %}
         {% endblock %}
