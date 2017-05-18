@@ -5,7 +5,7 @@
 class IngredientTypes {
 	constructor () {
 		this.getIngredientTypeTotal();
-		this.drawIngredientTable(50, 0);
+		this.drawIngredientTable(0);
 	}
 
 	getIngredientTypeTotal () {
@@ -19,11 +19,12 @@ class IngredientTypes {
 			.catch(err => console.error(err));
 	};
 
- drawIngredientTable  (limit, offset) {
- 	let name_filter = document.getElementById('filter-ingredient-type').value;
+ drawIngredientTable  (offset) {
+ 	let limit = document.getElementById('limit-ingredient-type').value;
+ 	let nameFilter = document.getElementById('filter-ingredient-type').value;
  	let url = '/rses/api/list/ingredient_type/' + limit + '/' + offset;
- 	if (name_filter) {
- 		url += '/' + name_filter
+ 	if (nameFilter) {
+ 		url += '/' + nameFilter
 	}
 	let table_content = document.getElementById('ingredient-types-table');
  	table_content.innerHTML = `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
@@ -97,10 +98,10 @@ class IngredientTypes {
 		let modal = document.getElementById('edit-modal');
 		let name = document.getElementById('edit-name');
 		name.value = targetRow.childNodes[0].innerHTML;
-		let submit_button_old = document.getElementById('edit-submit');
-		let submit_button = submit_button_old.cloneNode(true);
-		submit_button_old.parentNode.replaceChild(submit_button, submit_button_old);
-		submit_button.addEventListener("click", function handlerEdit (event) {
+		let submitButtonOld = document.getElementById('edit-submit');
+		let submitButton = submitButtonOld.cloneNode(true);
+		submitButtonOld.parentNode.replaceChild(submitButton, submitButtonOld);
+		submitButton.addEventListener("click", function handlerEdit () {
 			fetch('/rses/api/ingredient_type/' + targetIngredientTypeId + '/name/' + name.value,
 				{credentials: "include", method: 'post'})
 				.then(res => res.json())

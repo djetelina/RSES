@@ -6,86 +6,9 @@
         <title>{% block title %}{% endblock %} | RSES</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/custom.css') }}">
         <link href="https://fonts.googleapis.com/css?family=Lobster&amp;subset=latin-ext" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Cabin&amp;subset=latin-ext" rel="stylesheet">
-        <style>
-            h1, h2, h3, h4, h5, th, .rses-ab-heading {
-                font-family: 'Lobster', cursive;
-            }
-
-            body, .btn {
-                font-family: 'Cabin', sans-serif;
-            }
-
-            th {
-                font-size: 2.3rem;
-            }
-
-            td {
-                font-size: 2.1rem;
-            }
-
-            p {
-                font-size: 1.6rem;
-            }
-
-            .navbar-brand {
-                font-size: 2.1rem;
-            }
-
-            .alert {
-                font-size: 2.0rem;
-            }
-
-            .close {
-                font-size: 3.0rem;
-            }
-
-            .navbar-nav {
-                font-size: 1.7rem;
-            }
-
-            .dropdown-menu {
-                font-size: 1.5rem;
-            }
-
-            .rses-ab-table {
-                font-size: 1.2em;
-                padding: 0 5px;
-            }
-
-            .rses-ab-heading {
-                font-size: 2.3rem;
-                padding-left: 8px;
-            }
-
-            .rses-ab-s:hover, .rses-ab-s:active {
-                cursor: pointer;
-                text-shadow: 0 1px 5px lightgreen;
-            }
-
-            .rses-ab-d:hover, .rses-ab-d:active {
-                cursor: pointer;
-                text-shadow: 0 1px 5px lightcoral;
-            }
-
-            .rses-ab-i:hover, .rses-ab-i:active {
-                cursor: pointer;
-                text-shadow: 0 1px 5px lightblue;
-            }
-
-            .rses-table-menu {
-                padding: 0;
-            }
-
-            #alerts {
-                position: fixed;
-                top: 30px;
-                right: 30px;
-                z-index: 1051;
-                max-width: 500px;
-            }
-        </style>
     {% endblock %}
 </head>
 <body>

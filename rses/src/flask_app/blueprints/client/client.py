@@ -1,7 +1,7 @@
 # coding=utf-8
 """Web client"""
 from flask import Blueprint, render_template
-rses_web_client_bp = Blueprint('RSES_CLIENT', __name__,
+rses_web_client_bp = Blueprint('RSES_CLIENT', __name__, url_prefix='/rses',
                                template_folder='client', static_folder='static',
                                static_url_path='/static/web_client')
 

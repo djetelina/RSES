@@ -1,0 +1,89 @@
+h1, h2, h3, h4, h5, th, .rses-ab-heading {
+    font-family: 'Lobster', cursive;
+}
+
+body, input, .btn, .badge {
+    font-family: 'Cabin', sans-serif;
+}
+
+th {
+    font-size: 2.3rem;
+}
+
+td {
+    font-size: 2.1rem;
+}
+
+p {
+    font-size: 1.6rem;
+}
+
+.navbar-brand {
+    font-size: 2.1rem;
+}
+
+.alert {
+    font-size: 2.0rem;
+}
+
+.close {
+    font-size: 3.0rem;
+}
+
+.navbar-nav {
+    font-size: 1.7rem;
+}
+
+.dropdown-menu {
+    font-size: 1.5rem;
+}
+
+.rses-ab-table {
+    font-size: 1.2em;
+    padding: 0 5px;
+}
+
+.rses-ab-heading {
+    font-size: 2.3rem;
+    padding-left: 8px;
+}
+
+.rses-ab-s:hover, .rses-ab-s:active {
+    cursor: pointer;
+    text-shadow: 0 1px 5px lightgreen;
+}
+
+.rses-ab-d:hover, .rses-ab-d:active {
+    cursor: pointer;
+    text-shadow: 0 1px 5px lightcoral;
+}
+
+.rses-ab-i:hover, .rses-ab-i:active {
+    cursor: pointer;
+    text-shadow: 0 1px 5px lightblue;
+}
+
+.rses-table-menu {
+    padding: 0;
+}
+
+#alerts {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 1051;
+    max-width: 500px;
+}
+
+.keep-inline > label {
+    float: left;
+}
+.keep-inline > span {
+    display: block;
+    overflow: hidden;
+    padding-left: 8px;
+}
+.keep-inline > input {
+    width: 100%;
+
+}
