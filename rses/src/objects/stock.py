@@ -5,8 +5,8 @@ from typing import Optional, List, Any
 
 from psycopg2 import sql
 
-import errors
-from connections import db
+import rses_errors
+from rses_connections import db
 
 log = logging.getLogger(__name__)
 
@@ -66,9 +66,9 @@ class IngredientType:
         """Creates an ingredient type"""
         log.debug('Trying to create new %s', str(self))
         if self.exists() or self._id:
-            raise errors.AlreadyExists(self)
+            raise rses_errors.AlreadyExists(self)
         if self._name is None:
-            raise errors.MissingParameter('name')
+            raise rses_errors.MissingParameter('name')
         query = """
         INSERT INTO ingredient_type (id, name)
         VALUES (DEFAULT, %s)
@@ -81,7 +81,7 @@ class IngredientType:
         """Deletes an ingredient type"""
         log.debug('Deleting %s', str(self))
         if not self.exists():
-            raise errors.DoesNotExist(IngredientType, identifier=self._name)
+            raise rses_errors.DoesNotExist(IngredientType, identifier=self._name)
         query = """
         DELETE FROM ingredient_type
         WHERE id = %s
@@ -270,9 +270,9 @@ class Ingredient:
         required_params = dict(type=self._type, unit=self._unit)
         for name, param in required_params:
             if param is None:
-                errors.MissingParameter(name)
+                rses_errors.MissingParameter(name)
         if self.exists():
-            raise errors.AlreadyExists(self)
+            raise rses_errors.AlreadyExists(self)
         query = """
         INSERT INTO ingredient (name, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability)
         VALUES (%s, %s, %s, %s, %s, %s)

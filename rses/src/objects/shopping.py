@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 import logging
 
-from connections import db
+from rses_connections import db
 from objects.stock import Ingredient
 
 log = logging.getLogger(__name__)

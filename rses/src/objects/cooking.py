@@ -5,8 +5,8 @@ import logging
 
 from psycopg2 import sql
 
-import errors
-from connections import db
+import rses_errors
+from rses_connections import db
 from objects.stock import Ingredient
 
 log = logging.getLogger(__name__)
@@ -69,9 +69,9 @@ class RecipeCategory:
     def create(self) -> None:
         """Creates the recipe category"""
         if self.exists() or self._id:
-            raise errors.AlreadyExists(self)
+            raise rses_errors.AlreadyExists(self)
         if self._name is None:
-            raise errors.MissingParameter('name')
+            raise rses_errors.MissingParameter('name')
         query = """
         INSERT INTO recipe_category (id, name)
         VALUES (DEFAULT, %s)
@@ -83,7 +83,7 @@ class RecipeCategory:
     def delete(self) -> None:
         """Deletes the recipe category"""
         if not self.exists():
-            raise errors.DoesNotExist(RecipeCategory, identifier=self._name)
+            raise rses_errors.DoesNotExist(RecipeCategory, identifier=self._name)
         query = """
         DELETE FROM recipe_category
         WHERE id = %s
@@ -226,7 +226,7 @@ class Recipe:
         required_params = dict(portions=self._portions, name=self._name)
         for name, param in required_params.items():
             if param is None:
-                raise errors.MissingParameter(name)
+                raise rses_errors.MissingParameter(name)
         query = """
         INSERT INTO recipe (name, directions, picture, prepare_time, portions) 
         VALUES (%s, %s, %s, %s, %s)
@@ -244,7 +244,7 @@ class Recipe:
     def add_ingredient(self, ingredient: Ingredient, amount: float) -> None:
         """Adds an ingredient to the recipe"""
         if ingredient in self.ingredients.keys():
-            raise errors.AlreadyExists(ingredient, relation=self)
+            raise rses_errors.AlreadyExists(ingredient, relation=self)
         query = """
         INSERT INTO recipe_ingredients (recipe, ingredient, amount) 
         VALUES (%s, %s, %s)
@@ -265,7 +265,7 @@ class Recipe:
     def add_category(self, category: RecipeCategory) -> None:
         """Adds the recipe into a category"""
         if category in self.categories:
-            raise errors.AlreadyExists(category, relation=self)
+            raise rses_errors.AlreadyExists(category, relation=self)
         query = """
         INSERT INTO categorized_recipes (recipe, category) 
         VALUES (%s, %s)
@@ -292,7 +292,7 @@ class Recipe:
     def cook(self) -> None:
         """Adds the recipe the a log of cooked recipes and subtracts the ingredients from stock"""
         if not self.can_be_cooked():
-            raise errors.NotEnoughIngredients
+            raise rses_errors.NotEnoughIngredients
         query = """
         INSERT INTO recipe_made (recipe, portions, price) 
         VALUES (%s, %s, %s)

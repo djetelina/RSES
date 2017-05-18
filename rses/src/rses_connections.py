@@ -7,7 +7,7 @@ from urllib.parse import urlparse, ParseResult
 import psycopg2
 import psycopg2.extras
 
-from config import DATABASE_URL
+from rses_config import DATABASE_URL
 
 log = logging.getLogger(__name__)
 
