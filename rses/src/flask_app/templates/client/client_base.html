@@ -22,14 +22,14 @@
                     {% else %}
                         <a href="{{ url_for("RSES_CLIENT." + item["function_name"]) }}">
                     {% endif %}
-                        {{ item["title"] }}
+                        {{ item["title"] | safe }}
                         {% if item["children"] %}<span class="caret"></span>{% endif %}
                     </a>
                     {% if item["children"] %}
                         <ul class="dropdown-menu">
                             {% for child in item["children"] %}
                                 <li>
-                                    <a href="{{ url_for("RSES_CLIENT."+child["function_name"]) }}">{{ child["title"] }}</a>
+                                    <a href="{{ url_for("RSES_CLIENT."+child["function_name"]) }}">{{ child["title"] | safe }}</a>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -39,4 +39,8 @@
         </ul>
     </div>
 </div>
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    <script src="{{ url_for('RSES_CLIENT.static', filename='js/util.js') }}"></script>
 {% endblock %}

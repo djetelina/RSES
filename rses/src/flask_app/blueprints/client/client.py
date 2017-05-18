@@ -10,15 +10,15 @@ rses_web_client_bp = Blueprint('RSES_CLIENT', __name__,
 def inject_menu_items() -> dict:
     return dict(menu_items=[
         {
-            'title': 'Home',
+            'title': '<i class="fa fa-home" aria-hidden="true"></i> Home',
             'url': '/',
             'function_name': 'home',
             'children': None
         },
         {
-            'title': 'Manage',
+            'title': '<i class="fa fa-wrench" aria-hidden="true"></i> Manage',
             'children': [{
-                'title': 'Ingredient types',
+                'title': '<i class="fa fa-folder-open-o" aria-hidden="true"></i> Ingredient types',
                 'function_name': 'ingredient_types'
             }]
         }
