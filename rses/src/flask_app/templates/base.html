@@ -3,7 +3,7 @@
 <head>
     {% block head %}
         <meta charset="UTF-8">
-        <title>RSES {% block title %}{% endblock %}</title>
+        <title>{% block title %}{% endblock %} | RSES</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/font-awesome.min.css') }}">
         <link href="https://fonts.googleapis.com/css?family=Lobster&amp;subset=latin-ext" rel="stylesheet">
@@ -74,6 +74,17 @@
                 text-shadow: 0 1px 5px lightblue;
             }
 
+            .rses-table-menu {
+                padding: 0;
+            }
+
+            #alerts {
+                position: fixed;
+                top: 30px;
+                right: 30px;
+                z-index: 1051;
+                max-width: 500px;
+            }
         </style>
     {% endblock %}
 </head>

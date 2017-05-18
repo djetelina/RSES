@@ -1,9 +1,10 @@
 # coding=utf-8
 """API for more than just one client"""
-from flask import Blueprint, json, current_app, request
+from flask import Blueprint, json, current_app
 from objects import stock
 
 rses_api_bp = Blueprint('RSES_API', __name__, url_prefix='/rses/api')
+
 
 @rses_api_bp.route('/')
 def index():
@@ -47,12 +48,15 @@ def ingredient_type_rename(ingredient_type_id: int, new_name: str):
 
 
 @rses_api_bp.route('/list/ingredient_type/<int:limit>/<int:offset>', methods=['GET'])
-def list_ingredient_types(limit: int, offset: int):
-    listing = stock.IngredientTypeListing().show(limit, offset)
+@rses_api_bp.route('/list/ingredient_type/<int:limit>/<int:offset>/<string:name_filter>', methods=['GET'])
+def list_ingredient_types(limit: int, offset: int, name_filter: str= ''):
+    """Lists Ingredient Types"""
+    listing = stock.IngredientTypeListing().show(limit, offset, name_filter)
     return json.jsonify(dict(status='OK', ingredient_types=listing))
 
 
 @rses_api_bp.route('/list/total/ingredient_type', methods=['GET'])
 def total_ingredient_types():
+    """Returns total amount of Ingredient Types"""
     total = stock.IngredientTypeListing().total
     return json.jsonify(dict(status='OK', total=total))

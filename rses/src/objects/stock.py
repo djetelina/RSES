@@ -341,13 +341,15 @@ class IngredientTypeListing:
         """
         return db.select(query).total
 
-    def show(self, limit: int=50, offset: int=0):
-        query ="""
+    def show(self, limit: int=50, offset: int=0, name_filter: str= ''):
+        query = """
         SELECT id, name
         FROM ingredient_type
+        WHERE NAME LIKE %s
         ORDER BY id ASC
         LIMIT %s
         OFFSET %s
         """
-        res = db.select_all(query, limit, offset)
+        name_filter = f'%{name_filter}%'.lower()
+        res = db.select_all(query, name_filter, limit, offset)
         return [IngredientType(ingredient_type_id=item.id, name=item.name).json_dict for item in res]

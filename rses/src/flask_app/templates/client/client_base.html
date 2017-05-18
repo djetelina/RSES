@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %}Home{% endblock %}
 {% block navbar %}
 <div class="navbar navbar-static-top navbar-inverse container-fluid">
     <div class="navbar-header">
@@ -12,24 +13,24 @@
     <div class="collapse navbar-collapse" id="navbar">
         <ul class="nav navbar-nav">
             {% for item in menu_items %}
-                <li {% if item["children"] %}
+                <li {% if item.children %}
                 class="dropdown"
-                {% elif request.path == item["url"] %}
+                {% elif request.path == item.url %}
                 class="active"
                 {% endif %}>
-                    {% if item["children"] %}
+                    {% if item.children %}
                         <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);">
                     {% else %}
                         <a href="{{ url_for("RSES_CLIENT." + item["function_name"]) }}">
                     {% endif %}
-                        {{ item["title"] | safe }}
-                        {% if item["children"] %}<span class="caret"></span>{% endif %}
+                        {{ item.title | safe }}
+                        {% if item.children %}<span class="caret"></span>{% endif %}
                     </a>
-                    {% if item["children"] %}
+                    {% if item.children %}
                         <ul class="dropdown-menu">
-                            {% for child in item["children"] %}
+                            {% for child in item.children %}
                                 <li>
-                                    <a href="{{ url_for("RSES_CLIENT."+child["function_name"]) }}">{{ child["title"] | safe }}</a>
+                                    <a href="{{ url_for("RSES_CLIENT." + child.function_name) }}">{{ child.title | safe }}</a>
                                 </li>
                             {% endfor %}
                         </ul>

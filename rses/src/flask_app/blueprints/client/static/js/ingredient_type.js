@@ -20,13 +20,20 @@ class IngredientTypes {
 	};
 
  drawIngredientTable  (limit, offset) {
-	fetch('/rses/api/list/ingredient_type/' + limit + '/' + offset, {credentials: "include"})
+ 	let name_filter = document.getElementById('filter-ingredient-type').value;
+ 	let url = '/rses/api/list/ingredient_type/' + limit + '/' + offset;
+ 	if (name_filter) {
+ 		url += '/' + name_filter
+	}
+	let table_content = document.getElementById('ingredient-types-table');
+ 	table_content.innerHTML = `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
+								<span class="sr-only">Loading...</span></td></tr>`;
+	fetch(url,
+		{credentials: "include"})
 		.then(res => res.json())
 		.then((out) => {
-
-			let table_content = document.getElementById('ingredient-types-table');
-			table_content.innerHTML = "";
-			for (leti = 0; i < out.ingredient_types.length; i++) {
+		table_content.innerHTML= '';
+			for (let i = 0; i < out.ingredient_types.length; i++) {
 				this.insertIngredientTableRow(table_content, out.ingredient_types[i])
 			}
 		})
@@ -58,11 +65,29 @@ class IngredientTypes {
 		parent.appendChild(tableRow);
 	};
 
+	static createIngredientType () {
+		let modal = document.getElementById('create-modal');
+		let name = document.getElementById('create-name');
+		fetch('/rses/api/ingredient_type/new/' + name.value,
+			{credentials: 'include', method: 'post'})
+			.then(res => res.json())
+			.then((out) => {
+				notifySuccess("Ingredient Type '" + name.value + "' created");
+				refreshIngredientTypes();
+				name.value = "";
+			})
+			.catch(err => console.error(err));
+	};
+
 	deleteIngredientType (event) {
 		let targetIngredientTypeId = event.target.getAttribute('ingredient-type-id');
+		let name = event.target.parentNode.parentNode.childNodes[0].innerHTML;
 		fetch('/rses/api/ingredient_type/' + targetIngredientTypeId, {credentials: "include", method: 'delete'})
 			.then(res => res.json())
-			.then((out) => {})
+			.then((out) => {
+				notifySuccess("Deleted '" + name + "'")
+				refreshIngredientTypes();
+			})
 			.catch(err => console.error(err));
 	};
 
@@ -72,21 +97,25 @@ class IngredientTypes {
 		let modal = document.getElementById('edit-modal');
 		let name = document.getElementById('edit-name');
 		name.value = targetRow.childNodes[0].innerHTML;
-		document.getElementById('edit-submit').addEventListener("click", function handler (event) {
+		let submit_button_old = document.getElementById('edit-submit');
+		let submit_button = submit_button_old.cloneNode(true);
+		submit_button_old.parentNode.replaceChild(submit_button, submit_button_old);
+		submit_button.addEventListener("click", function handlerEdit (event) {
 			fetch('/rses/api/ingredient_type/' + targetIngredientTypeId + '/name/' + name.value,
 				{credentials: "include", method: 'post'})
 				.then(res => res.json())
 				.then((out) => {
 					notifySuccess("Ingredient Type edited, new name: '" + out.new_name + "'");
+					refreshIngredientTypes();
 				})
 				.catch(err => console.error(err));
-			event.currentTarget.removeEventListener(event.type, handler)
 		});
 	}
 }
 
-let ingredient_types = new IngredientTypes();
 
-window.addEventListener("click", function () {
+let refreshIngredientTypes = function () {
 	let ingredient_types = new IngredientTypes();
-});
+};
+
+refreshIngredientTypes();

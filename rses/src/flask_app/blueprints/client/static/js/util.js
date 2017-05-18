@@ -32,10 +32,11 @@ let notifySuccess = function (text) {
 	closeButton.setAttribute('aria-label', 'close');
 	closeButton.innerHTML = '&times;';
 	let strong = document.createElement('strong');
-	strong.innerHTML = 'Success! ';
-	alert.appendChild(closeButton);
+	strong.innerHTML = '<i class="fa fa-check" aria-hidden="true"></i> ';
 	alert.appendChild(strong);
 	alert.innerHTML += text;
 	let alerts = document.getElementById('alerts');
+	alert.appendChild(closeButton);
 	alerts.appendChild(alert);
+	setTimeout(function () {alert.style = 'display: none';}, 5000)
 };
