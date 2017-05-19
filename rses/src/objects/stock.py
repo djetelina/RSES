@@ -346,7 +346,7 @@ class IngredientTypeListing:
         SELECT id, name
         FROM ingredient_type
         WHERE NAME LIKE %s
-        ORDER BY id ASC
+        ORDER BY name ASC
         LIMIT %s
         OFFSET %s
         """
