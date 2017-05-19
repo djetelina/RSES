@@ -8,37 +8,31 @@ class IngredientTypes {
 		this.drawIngredientTable(0);
 	}
 
-	getIngredientTypeTotal () {
-		fetch('/rses/api/list/total/ingredient_type', {credentials: "include"})
-			.then(res => res.json())
-			.then((out) => {
-				console.debug('getIngredientTypeTotal response');
-				console.debug(out);
-				document.getElementById('ingredient-type-total').innerHTML = out.total;
-			})
-			.catch(err => console.error(err));
+	async getIngredientTypeTotal () {
+		document.getElementById('ingredient-type-total').innerHTML = `<i class="fa fa-refresh fa-spin fa-fw"></i>`;
+
+		let response = await fetchRses('/list/total/ingredient_type', 'get');
+		document.getElementById('ingredient-type-total').innerHTML = response.total;
 	};
 
- drawIngredientTable  (offset) {
- 	let limit = document.getElementById('limit-ingredient-type').value;
- 	let nameFilter = document.getElementById('filter-ingredient-type').value;
- 	let url = '/rses/api/list/ingredient_type/' + limit + '/' + offset;
- 	if (nameFilter) {
- 		url += '/' + nameFilter
-	}
-	let table_content = document.getElementById('ingredient-types-table');
- 	table_content.innerHTML = `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
-								<span class="sr-only">Loading...</span></td></tr>`;
-	fetch(url,
-		{credentials: "include"})
-		.then(res => res.json())
-		.then((out) => {
-		table_content.innerHTML= '';
-			for (let i = 0; i < out.ingredient_types.length; i++) {
-				this.insertIngredientTableRow(table_content, out.ingredient_types[i])
-			}
-		})
-		.catch(err => console.error(err));
+    async drawIngredientTable  (offset) {
+	    let limit = document.getElementById('limit-ingredient-type').value;
+	    let nameFilter = document.getElementById('filter-ingredient-type').value;
+
+	    let url = '/list/ingredient_type/' + limit + '/' + offset;
+	    if (nameFilter) {
+	        url += '/' + nameFilter
+		}
+
+		let tableContent = document.getElementById('ingredient-types-table');
+	    tableContent.innerHTML = `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
+									<span class="sr-only">Loading...</span></td></tr>`;
+
+		let response = await fetchRses(url, 'get');
+		tableContent.innerHTML= '';
+		response.ingredient_types.forEach(item => {
+			this.insertIngredientTableRow(tableContent, item)
+		});
 };
 
 	insertIngredientTableRow (parent, ingredient_type) {
@@ -66,18 +60,13 @@ class IngredientTypes {
 		parent.appendChild(tableRow);
 	};
 
-	static createIngredientType () {
+	static async createIngredientType () {
 		let modal = document.getElementById('create-modal');
 		let name = document.getElementById('create-name');
-		fetch('/rses/api/ingredient_type/new/' + name.value,
-			{credentials: 'include', method: 'post'})
-			.then(res => res.json())
-			.then((out) => {
-				notifySuccess("Ingredient Type '" + name.value + "' created");
-				refreshIngredientTypes();
-				name.value = "";
-			})
-			.catch(err => console.error(err));
+		await fetchRses('/ingredient_type/new/' + name.value, 'post');
+		notifySuccess("Ingredient Type '" + name.value + "' created");
+		refreshIngredientTypes();
+		name.value = "";
 	};
 
 	deleteIngredientType (event) {
@@ -86,7 +75,7 @@ class IngredientTypes {
 		fetch('/rses/api/ingredient_type/' + targetIngredientTypeId, {credentials: "include", method: 'delete'})
 			.then(res => res.json())
 			.then((out) => {
-				notifySuccess("Deleted '" + name + "'")
+				notifySuccess("Deleted '" + name + "'");
 				refreshIngredientTypes();
 			})
 			.catch(err => console.error(err));

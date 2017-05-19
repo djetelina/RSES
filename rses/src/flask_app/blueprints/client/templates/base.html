@@ -4,9 +4,9 @@
     {% block head %}
         <meta charset="UTF-8">
         <title>{% block title %}{% endblock %} | RSES</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/bootstrap.min.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/font-awesome.min.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/custom.css') }}">
+        <link rel="stylesheet" href="{{ url_for('RSES_CLIENT.static', filename='styles/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('RSES_CLIENT.static', filename='styles/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('RSES_CLIENT.static', filename='styles/custom.css') }}">
         <link href="https://fonts.googleapis.com/css?family=Lobster&amp;subset=latin-ext" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Cabin&amp;subset=latin-ext" rel="stylesheet">
     {% endblock %}

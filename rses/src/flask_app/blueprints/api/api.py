@@ -1,9 +1,15 @@
 # coding=utf-8
 """API for more than just one client"""
-from flask import Blueprint, json, current_app
+from flask import Blueprint, json, current_app, session, abort
 from objects import stock
 
 rses_api_bp = Blueprint('RSES_API', __name__, url_prefix='/rses/api')
+
+
+@rses_api_bp.before_request
+def before_api_request():
+    if not session.get('authorized', False):
+        return abort(403)
 
 
 @rses_api_bp.route('/')
@@ -52,11 +58,11 @@ def ingredient_type_rename(ingredient_type_id: int, new_name: str):
 def list_ingredient_types(limit: int, offset: int, name_filter: str= ''):
     """Lists Ingredient Types"""
     listing = stock.IngredientTypeListing().show(limit, offset, name_filter)
-    return json.jsonify(dict(status='OK', ingredient_types=listing))
+    return json.jsonify(dict(status='OK', ingredient_types=listing)), 200
 
 
 @rses_api_bp.route('/list/total/ingredient_type', methods=['GET'])
 def total_ingredient_types():
     """Returns total amount of Ingredient Types"""
     total = stock.IngredientTypeListing().total
-    return json.jsonify(dict(status='OK', total=total))
+    return json.jsonify(dict(status='OK', total=total)), 200
