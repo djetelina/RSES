@@ -63,12 +63,12 @@ def authorize():
         else:
             flash("Invalid password")
 
-    return render_template('authorize.html')
+    return render_template('rses_authorize.html')
 
 
 @rses_web_client_bp.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('rses_home.html')
 
 
 @rses_web_client_bp.route('/manage/ingredient_types')
