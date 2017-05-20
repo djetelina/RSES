@@ -80,3 +80,18 @@ const notifySuccess = function (text) {
 const notifyError = function (text) {
 	notifyBase('danger', 'cross', text)
 };
+
+const tableLoading = function () {
+	return `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
+									<span class="sr-only">Loading...</span></td></tr>`;
+};
+
+function getDistFromBottom() {
+
+	var scrollPosition = window.pageYOffset;
+	var windowSize = window.innerHeight;
+	var bodyHeight = document.body.offsetHeight;
+
+	return Math.max(bodyHeight - (scrollPosition + windowSize), 0);
+
+}

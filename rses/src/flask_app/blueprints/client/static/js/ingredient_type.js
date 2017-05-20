@@ -2,10 +2,15 @@
  * Created by David on 17.05.2017.
  */
 
-class IngredientTypes {
+class IngredientTypesClass {
 	constructor () {
+		this.loading = false;
+		this.loaded = 0;
+		this.allLoaded = false;
+		this.tableContent = document.getElementById('ingredient-types-table');
+		this.total = 0;
 		this.getIngredientTypeTotal();
-		this.drawIngredientTable(0);
+		this.drawIngredientTable();
 	}
 
 	async getIngredientTypeTotal () {
@@ -13,26 +18,39 @@ class IngredientTypes {
 
 		const response = await fetchRsesCatch('/list/total/ingredient_type', 'get');
 		document.getElementById('ingredient-type-total').innerHTML = response.total;
+		this.total = response.total;
 	};
 
-    async drawIngredientTable  (offset) {
-	    const limit = document.getElementById('limit-ingredient-type').value;
+    async drawIngredientTable  (reload = true) {
+    	this.loading = true;
+	    const limit = 20;
 	    const nameFilter = document.getElementById('filter-ingredient-type').value;
+	    if (reload) this.loaded = 0;
+	    console.log(this.loaded);
 
-	    let url = `/list/ingredient_type/${limit}/${offset}`;
+	    let url = `/list/ingredient_type/${limit}/${this.loaded}`;
 	    if (nameFilter) {
 	        url += `/${nameFilter}`
 		}
 
-		const tableContent = document.getElementById('ingredient-types-table');
-	    tableContent.innerHTML = `<tr><td colspan="2" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
-									<span class="sr-only">Loading...</span></td></tr>`;
+		let response;
 
-		const response = await fetchRsesCatch(url, 'get');
-		tableContent.innerHTML= '';
+	    if (this.loaded === 0) {
+		    this.tableContent.innerHTML = tableLoading();
+		    response = await fetchRsesCatch(url, 'get');
+		    this.tableContent.innerHTML = '';
+	    } else {
+	    	this.tableContent.innerHTML +=  tableLoading();
+		    response = await fetchRsesCatch(url, 'get');
+		    this.tableContent.removeChild(this.tableContent.lastChild);
+	    }
+
+	    this.loaded += limit;
+
 		response.ingredient_types.forEach(item => {
-			this.insertIngredientTableRow(tableContent, item)
+			this.insertIngredientTableRow(this.tableContent, item)
 		});
+		this.loading = false;
 };
 
 	insertIngredientTableRow (parent, ingredient_type) {
@@ -66,11 +84,12 @@ class IngredientTypes {
 			.then(out => {
 				notifySuccess(`Ingredient Type '${name.value}' created`);
 				refreshIngredientTypes();
+				name.value = "";
 			})
 			.catch(err => {
 				notifyError(err);
+				name.value = "";
 			});
-		name.value = "";
 	};
 
 	deleteIngredientType (event) {
@@ -105,9 +124,26 @@ class IngredientTypes {
 	}
 }
 
+document.addEventListener('scroll', function () {
+	console.log(ingredientTypes.loaded, ingredientTypes.total, ingredientTypes.allLoaded);
+	if (!ingredientTypes.loading &&
+		getDistFromBottom() > 0 &&
+		getDistFromBottom() <= 8888 &&
+		ingredientTypes.loaded < ingredientTypes.total) {
+		console.log('should execute load');
+		ingredientTypes.drawIngredientTable(false);
+	} else if (ingredientTypes.loaded >= ingredientTypes.total && !ingredientTypes.allLoaded) {
+		ingredientTypes.allLoaded = true;
+		ingredientTypes.tableContent.innerHTML += `<tr><td colspan="2" align="center">Nothing more to load.</td></tr>`
+
+	}
+
+});
 
 const refreshIngredientTypes = function () {
-	let ingredient_types = new IngredientTypes();
+	ingredientTypes.allLoaded = false;
+	ingredientTypes.total = ingredientTypes.getIngredientTypeTotal();
+	ingredientTypes.drawIngredientTable();
 };
 
-refreshIngredientTypes();
+let ingredientTypes = new IngredientTypesClass();
