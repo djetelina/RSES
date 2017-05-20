@@ -26,7 +26,6 @@ class IngredientTypesClass {
 	    const limit = 20;
 	    const nameFilter = document.getElementById('filter-ingredient-type').value;
 	    if (reload) this.loaded = 0;
-	    console.log(this.loaded);
 
 	    let url = `/list/ingredient_type/${limit}/${this.loaded}`;
 	    if (nameFilter) {
@@ -40,7 +39,7 @@ class IngredientTypesClass {
 		    response = await fetchRsesCatch(url, 'get');
 		    this.tableContent.innerHTML = '';
 	    } else {
-	    	this.tableContent.innerHTML +=  tableLoading();
+	    	this.tableContent.insertAdjacentHTML('beforeend', tableLoading());
 		    response = await fetchRsesCatch(url, 'get');
 		    this.tableContent.removeChild(this.tableContent.lastChild);
 	    }
@@ -80,16 +79,15 @@ class IngredientTypesClass {
 	static async createIngredientType () {
 		const modal = document.getElementById('create-modal');
 		const name = document.getElementById('create-name');
-		fetchRses('/ingredient_type/new/' + name.value, 'post')
+		fetchRses(`/ingredient_type/new/${encodeHTML(name.value)}`, 'post')
 			.then(out => {
 				notifySuccess(`Ingredient Type '${name.value}' created`);
 				refreshIngredientTypes();
-				name.value = "";
 			})
 			.catch(err => {
 				notifyError(err);
-				name.value = "";
-			});
+			})
+			.then(out => name.value = "");
 	};
 
 	deleteIngredientType (event) {
@@ -108,12 +106,15 @@ class IngredientTypesClass {
 		const targetIngredientTypeId = event.target.getAttribute('ingredient-type-id');
 		const modal = document.getElementById('edit-modal');
 		const name = document.getElementById('edit-name');
-		name.value = targetRow.childNodes[0].innerHTML;
+		console.debug(name.value);
+		console.debug(decodeHTML(targetRow.childNodes[0].innerHTML));
+		name.value = decodeHTML(targetRow.childNodes[0].innerHTML);
+		console.debug(name.value);
 		const submitButtonOld = document.getElementById('edit-submit');
 		const submitButton = submitButtonOld.cloneNode(true);
 		submitButtonOld.parentNode.replaceChild(submitButton, submitButtonOld);
 		submitButton.addEventListener("click", function handlerEdit () {
-			fetchRses(`/ingredient_type/${targetIngredientTypeId}/name/${name.value}`,
+			fetchRses(`/ingredient_type/${targetIngredientTypeId}/name/${encodeHTML(name.value)}`,
 				'post')
 				.then((out) => {
 					notifySuccess(`Ingredient Type edited, new name: '${out.new_name}'`);
@@ -125,19 +126,27 @@ class IngredientTypesClass {
 }
 
 document.addEventListener('scroll', function () {
-	console.log(ingredientTypes.loaded, ingredientTypes.total, ingredientTypes.allLoaded);
 	if (!ingredientTypes.loading &&
 		getDistFromBottom() > 0 &&
 		getDistFromBottom() <= 8888 &&
 		ingredientTypes.loaded < ingredientTypes.total) {
-		console.log('should execute load');
+		console.debug('Loading more');
 		ingredientTypes.drawIngredientTable(false);
 	} else if (ingredientTypes.loaded >= ingredientTypes.total && !ingredientTypes.allLoaded) {
 		ingredientTypes.allLoaded = true;
-		ingredientTypes.tableContent.innerHTML += `<tr><td colspan="2" align="center">Nothing more to load.</td></tr>`
+		ingredientTypes.tableContent.insertAdjacentHTML('beforeend',
+			`<tr><td colspan="2" align="center">Nothing more to load.</td></tr>`
+		)
 
 	}
+});
 
+$('#edit-modal').on('shown.bs.modal', function () {
+	$('#edit-name').focus()
+});
+
+$('#create-modal').on('shown.bs.modal', function () {
+	$('#create-name').focus()
 });
 
 const refreshIngredientTypes = function () {

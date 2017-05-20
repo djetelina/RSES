@@ -86,7 +86,35 @@ const tableLoading = function () {
 									<span class="sr-only">Loading...</span></td></tr>`;
 };
 
-function getDistFromBottom() {
+const HTMLEntities = [
+	['&amp', '&'],
+	['&apos', '\''],
+	['&lt', '<'],
+	['&gt', '>'],
+	['&nbsp', ' '],
+	['&quot', '"']
+];
+
+const decodeHTML = function (text) {
+
+	HTMLEntities.forEach(entity => {
+		text = text.replace(new RegExp(entity[0] + ';', 'g'), entity[1]);
+	});
+
+	return text;
+};
+
+const encodeHTML = function (text) {
+	console.log('encode input', text);
+	HTMLEntities.forEach(entity => {
+		text = text.replace(new RegExp(entity[1], 'g'), entity[0] + ';');
+	});
+
+	console.log('encode output', text);
+	return encodeURIComponent(encodeURIComponent(text));
+};
+
+const getDistFromBottom = function () {
 
 	var scrollPosition = window.pageYOffset;
 	var windowSize = window.innerHeight;
