@@ -130,7 +130,6 @@ class Recipe:
         :param picture:         Picture of the finished thing
         :param prepare_time:    Prepare time in minutes
         :param portions:        For how many portions should the recipe be shown
-        :param new:             If it's a new recipe, so it doesn't try and load from database
         """
         self._id: Optional[int] = recipe_id
         self._name: Optional[str] = name
@@ -311,7 +310,7 @@ class Recipe:
         res = db.select(query, self._id)
         self._name = res.name
         self._directions = res.directions
-        self._picture = res.picture,
+        self._picture = res.picture
         self._prepare_time = res.prepare_time
         self._portions = res.portions
 

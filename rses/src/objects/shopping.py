@@ -1,7 +1,7 @@
 # coding=utf-8
 """Objects related to shopping"""
-from datetime import datetime
 from typing import Optional, List
+import datetime
 import logging
 
 from rses_connections import db
@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 
 class ShoppingItem(Ingredient):
     """For displaying in shopping list"""
-    def __init__(self, id: int, amount: Optional[float] = None) -> None:
-        super().__init__(ingredient_id=id)
+    def __init__(self, shopping_item_id: int, amount: Optional[float] = None) -> None:
+        super().__init__(ingredient_id=shopping_item_id)
         self._amount: Optional[float] = amount
         self.current_price: Optional[float] = None
         self.expiration_date: Optional[datetime.date] = None
@@ -123,10 +123,10 @@ class ShoppingList:
         """
         Adds items to the shopping list that are under the critical threshold to rebuy.
         
-        If the threshold is 0, it means it shouldn't be rebought
+        If the threshold is 0, it means it shouldn't be re-bought
         """
         query = """
-        SELECT id
+        SELECT i.id
         FROM ingredient i
         LEFT JOIN stock s 
           ON i.id = s.ingredient
@@ -146,7 +146,7 @@ class ShoppingList:
         Suggests items for purchase, but does not add them to things to buy - this has to be done manually
         """
         query = """
-        SELECT id
+        SELECT i.id
         FROM ingredient i
         LEFT JOIN stock s 
           ON i.id = s.ingredient

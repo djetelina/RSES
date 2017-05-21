@@ -13,7 +13,7 @@ class DoesNotExist(Exception):
         :param add_info:        Additional info
         """
         # We care about the name of the class itself
-        self.what: Type[object] = what.__name__
+        self.what: str = what.__name__
         self.identifier: str = identifier
         self.add_info: Optional[str] = add_info
 
@@ -54,4 +54,5 @@ class MissingParameter(Exception):
 
 
 class NotEnoughIngredients(Exception):
+    """Error raised when ingredients are missing to cook a recipe"""
     pass

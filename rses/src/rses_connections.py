@@ -1,7 +1,7 @@
 # coding=utf-8
 """Connections"""
 import logging
-from typing import NamedTuple, List, Optional
+from typing import List, Optional, Any  # TODO any isn't really what we want, but namedtuple interface with mypy is weird
 from urllib.parse import urlparse, ParseResult
 
 import psycopg2
@@ -50,7 +50,7 @@ class DatabaseAdapter:
         with self.connection as conn:
             return conn.cursor()
 
-    def select(self, query: str, *args) -> NamedTuple:
+    def select(self, query: str, *args) -> Any:
         """Wrapped execute around select statement for single result"""
         with self.cursor as cur:
             cur.execute(query, args)
@@ -58,7 +58,7 @@ class DatabaseAdapter:
             log.debug("Ran select query\n'%s'\nResult: %s", _query_for_log(cur.query), result)
         return result
 
-    def select_all(self, query: str, *args) -> List[NamedTuple]:
+    def select_all(self, query: str, *args) -> List[Any]:
         """Wrapped execute around select statement for multiple results"""
         with self.cursor as cur:
             cur.execute(query, args)
@@ -74,7 +74,7 @@ class DatabaseAdapter:
             row_count = cur.rowcount
         return row_count
 
-    def insert(self, query: str, *args) -> Optional[NamedTuple]:
+    def insert(self, query: str, *args) -> Optional[Any]:
         """Wrapped execute around insert statement"""
         with self.cursor as cur:
             cur.execute(query, args)
@@ -97,7 +97,7 @@ def _query_for_log(query: bytes) -> str:
     with no newlines, extra spaces, and converted to string
     
     :param query:   Query ran by psycopg2
-    :return:        Claned up string representing the query
+    :return:        Cleaned up string representing the query
     """
     return ' '.join(query.decode().replace('\n', ' ').split())
 

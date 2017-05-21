@@ -70,7 +70,8 @@ class IngredientTypesClass {
 
 		rowActions.appendChild(editButton);
 		rowActions.appendChild(deleteButton);
-		tableRow.appendChild(rowName).innerHTML = ingredient_type.name;
+		rowName.innerHTML = ingredient_type.name;
+		tableRow.appendChild(rowName);
 		tableRow.appendChild(rowActions);
 		tableRow.setAttribute('ingredient-type-id', ingredient_type.id);
 		parent.appendChild(tableRow);

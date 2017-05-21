@@ -12,6 +12,7 @@ rses_api_bp = Blueprint('RSES_API', __name__, url_prefix='/rses/api')
 
 @rses_api_bp.before_request
 def before_api_request():
+    """Cancels request if the session is not authorized"""
     if not session.get('authorized', False):
         return abort(403)
 
@@ -45,7 +46,7 @@ def ingredient_type_delete(ingredient_type_id: int):
 @rses_api_bp.route('/ingredient_type/new/<string:name>', methods=['POST'])
 def ingredient_type_create(name: str):
     """Creates a new ingredient type"""
-    name: str = html.unescape(unquote(name))
+    name = html.unescape(unquote(name))
     ingredient_type = stock.IngredientType(name=name)
     return json.jsonify(dict(status='OK', id=ingredient_type.id)), 201
 
@@ -54,7 +55,7 @@ def ingredient_type_create(name: str):
 def ingredient_type_rename(ingredient_type_id: int, new_name: str):
     """Renames an ingredient type"""
     print(new_name)
-    new_name: str = html.unescape(unquote(new_name))
+    new_name = html.unescape(unquote(new_name))
     print(new_name)
     ingredient_type = stock.IngredientType(ingredient_type_id=ingredient_type_id)
     ingredient_type.name = new_name
@@ -65,7 +66,7 @@ def ingredient_type_rename(ingredient_type_id: int, new_name: str):
 @rses_api_bp.route('/list/ingredient_type/<int:limit>/<int:offset>/<string:name_filter>', methods=['GET'])
 def list_ingredient_types(limit: int, offset: int, name_filter: str= ''):
     """Lists Ingredient Types"""
-    name_filter: str = html.unescape(unquote(name_filter))
+    name_filter = html.unescape(unquote(name_filter))
     listing = stock.IngredientTypeListing().show(limit, offset, name_filter)
     return json.jsonify(dict(status='OK', ingredient_types=listing)), 200
 

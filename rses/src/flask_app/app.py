@@ -16,6 +16,7 @@ if app.config['RSES_WEB_CLIENT']:
 
 
     def home():
+        """Temporary home view if client is registered"""
         return redirect(url_for('RSES_CLIENT.home'))
 
 
@@ -23,6 +24,7 @@ if app.config['RSES_WEB_CLIENT']:
 else:
     # Redirect root url to API index if not running web client
     def home():
+        """Temporary home view if only api is registered"""
         return redirect(url_for('RSES_API.index'))
 
 

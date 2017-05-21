@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # coding=utf-8
+"""Run - mainly for development"""
 
 from flask_app.app import app
 

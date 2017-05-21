@@ -1,6 +1,29 @@
-{% extends "client_base.html" %}
-{% block title %} - Home{% endblock %}
+{% extends "rses_base.html" %}
+{% block title %}Home{% endblock %}
 {% block content %}
     <h1>Recipes-Stock-Expiration-Shopping List</h1>
     <p>Welcome to our smart kitchen</p>
+    <h2>Things to do</h2>
+    This is something like a road map :)
+    <h3>Managing</h3>
+    <ul>
+        <li style="text-decoration: line-through;">Ingredient Types</li>
+        <li>Ingredients</li>
+        <li>Recipe Categories</li>
+        <li>Shopping list</li>
+    </ul>
+    <h3>Usage</h3>
+    <ul>
+        <li>Recipes</li>
+    </ul>
+    <h3>Technicalities</h3>
+    <ul>
+        <li style="text-decoration: line-through;">Git submodule compatibility</li>
+        <li>
+            Code structure
+            <ul>
+                <li>Refactor ingredient types enough so the rest of managing is easy to write</li>
+            </ul>
+        </li>
+    </ul>
 {% endblock %}

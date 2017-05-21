@@ -12,6 +12,7 @@ rses_web_client_bp = Blueprint('RSES_CLIENT', __name__, url_prefix='/rses',
 
 @rses_web_client_bp.context_processor
 def inject_menu_items() -> dict:
+    """Defines items of navbar"""
     return dict(menu_items=[
         {
             'title': '<i class="fa fa-home" aria-hidden="true"></i> Home',
@@ -34,6 +35,7 @@ def public(endpoint):
 
     @wraps(endpoint)
     def public_endpoint(*args, **kwargs):
+        """Wrapper for public endpoint"""
         return endpoint(*args, **kwargs)
 
     public_endpoint._is_public = True
@@ -68,9 +70,11 @@ def authorize():
 
 @rses_web_client_bp.route('/')
 def home():
+    """Home view"""
     return render_template('rses_home.html')
 
 
 @rses_web_client_bp.route('/manage/ingredient_types')
 def ingredient_types():
+    """View for managing ingredient types"""
     return render_template('stock/ingredient_types.html')

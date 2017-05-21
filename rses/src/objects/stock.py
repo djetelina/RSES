@@ -1,7 +1,7 @@
 # coding=utf-8
 """Objects related to ingredients and stock"""
 import logging
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict, Union
 
 from psycopg2 import sql
 
@@ -113,7 +113,8 @@ class IngredientType:
         self._name = res.name
 
     @property
-    def json_dict(self):
+    def json_dict(self) -> Dict[str, Union[int, str]]:
+        """Returns dictionary that can be jsonified and served by the api"""
         return dict(id=self.id, name=self.name)
 
 
@@ -152,7 +153,7 @@ class Ingredient:
 
     @property
     def id(self) -> int:
-        """Id of the ingredient in the databse, cannot be modified"""
+        """Id of the ingredient in the database, cannot be modified"""
         return self._id
 
     @property
@@ -332,16 +333,28 @@ class Ingredient:
 
 
 class IngredientTypeListing:
+    """class for total and individual items of Ingredient Type table"""
 
     @property
     def total(self) -> int:
+        """How many ingredient types there are in the database"""
         query = """
         SELECT COUNT(*) AS total
         FROM ingredient_type
         """
         return db.select(query).total
 
-    def show(self, limit: int=50, offset: int=0, name_filter: str= ''):
+    @staticmethod
+    def show(limit: int=50, offset: int=0, name_filter: str= '') -> List[Dict[str, Union[int, str]]]:
+        """
+        Lists ingredient types
+        
+        :param limit:           How many to list
+        :param offset:          Select offset
+        :param name_filter:     If the name should be filtered at all, will be lowered automatically
+        :return:                Filtered and limited ingredient types as dictionaries
+        """
+        name_filter = name_filter.lower()
         query = """
         SELECT id, name
         FROM ingredient_type

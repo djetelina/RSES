@@ -122,4 +122,4 @@ const getDistFromBottom = function () {
 
 	return Math.max(bodyHeight - (scrollPosition + windowSize), 0);
 
-}
+};
