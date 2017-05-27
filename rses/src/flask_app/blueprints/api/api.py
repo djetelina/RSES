@@ -54,9 +54,7 @@ def ingredient_type_create(name: str):
 @rses_api_bp.route('/ingredient_type/<int:ingredient_type_id>/name/<string:new_name>', methods=['POST'])
 def ingredient_type_rename(ingredient_type_id: int, new_name: str):
     """Renames an ingredient type"""
-    print(new_name)
     new_name = html.unescape(unquote(new_name))
-    print(new_name)
     ingredient_type = stock.IngredientType(ingredient_type_id=ingredient_type_id)
     ingredient_type.name = new_name
     return json.jsonify(dict(status='OK', new_name=ingredient_type.name)), 200

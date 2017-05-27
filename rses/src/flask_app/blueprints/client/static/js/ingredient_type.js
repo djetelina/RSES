@@ -131,7 +131,6 @@ document.addEventListener('scroll', function () {
 		getDistFromBottom() > 0 &&
 		getDistFromBottom() <= 8888 &&
 		ingredientTypes.loaded < ingredientTypes.total) {
-		console.debug('Loading more');
 		ingredientTypes.drawIngredientTable(false);
 	} else if (ingredientTypes.loaded >= ingredientTypes.total && !ingredientTypes.allLoaded) {
 		ingredientTypes.allLoaded = true;
