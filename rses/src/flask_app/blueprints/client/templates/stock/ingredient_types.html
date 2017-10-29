@@ -1,4 +1,5 @@
 {% extends "rses_base.html" %}
+{% from 'macros.html' import modal_new, modal_edit %}
 {% block title %}Ingredient Types{% endblock %}
 {% block content %}
     {# Heading #}
@@ -32,7 +33,7 @@
                     <label for="filter-ingredient-type">Name</label>
                     <span class="col-xs-7 col-md-3 col-lg-2">
                             <input id="filter-ingredient-type" type="text" class="form-control input-sm"
-                                   onchange="refreshIngredientTypes()" placeholder="Filter">
+                                   onkeyup="refreshIngredientTypes()" placeholder="Filter">
                         </span>
                 </th>
                 <th class="text-center">Actions</th>
@@ -47,58 +48,8 @@
         </table>
     </div>
 
-    {# Modal for editing an ingredient type #}
-    <div class="modal" id="edit-modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Edit Ingredient Type</h4>
-                </div>
-                <form>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label class="control-label" for="edit-name">Name</label>
-                            <input class="form-control input-lg" id="edit-name" type="text" value="">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="edit-submit" data-dismiss="modal">
-                            Save changes
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {# Modal for creating a new ingredient type #}
-    <div class="modal" id="create-modal" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Create Ingredient Type</h4>
-                </div>
-                <form>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label class="control-label" for="create-name">Name</label>
-                            <input class="form-control input-lg" id="create-name" type="text" value="">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" id="create-submit" data-dismiss="modal"
-                                onclick="IngredientTypesClass.createIngredientType()">
-                            Save changes
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    {{ modal_new('Create Ingredient Type', ['name'], 'IngredientTypesClass.createIngredientType()') }}
+    {{ modal_edit('Edit Ingredient Type', ['name']) }}
 
 {% endblock %}
 {% block js_footer %}

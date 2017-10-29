@@ -58,14 +58,16 @@ class IngredientTypesClass {
 		const rowActions = document.createElement("td");
 		rowActions.className = "text-center";
 
-		const deleteButton = createDeleteButton(
+		const deleteButton = createActionButton(
 			{name: 'ingredient-type-id', id: ingredient_type.id},
-			this.deleteIngredientType
+			this.deleteIngredientType,
+			"delete"
 		);
 
-		const editButton = createEditButton(
+		const editButton = createActionButton(
 			{name: 'ingredient-type-id', id: ingredient_type.id},
-			this.editIngredientType
+			this.editIngredientType,
+			"edit"
 		);
 
 		rowActions.appendChild(editButton);
@@ -126,6 +128,9 @@ class IngredientTypesClass {
 	}
 }
 
+/**
+ *  Infinite scrolling
+ */
 document.addEventListener('scroll', function () {
 	if (!ingredientTypes.loading &&
 		getDistFromBottom() > 0 &&

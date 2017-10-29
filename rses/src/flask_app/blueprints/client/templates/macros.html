@@ -1,0 +1,58 @@
+{% macro modal_new(title, fields, onclick) %}
+    <div class="modal" id="create-modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">{{ title }}</h4>
+                </div>
+                <form>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            {% for field in fields%}
+                                <label class="control-label" for="create-{{ field|lower }}">{{ field|capitalize }}</label>
+                                <input class="form-control input-lg" id="create-{{ field|lower }}" type="text" value="">
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="create-submit" data-dismiss="modal"
+                                onclick="{{ onclick }}">
+                            Save changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro modal_edit(title, fields) %}
+    <div class="modal" id="edit-modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">{{ title }}</h4>
+                </div>
+                <form>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            {% for field in fields %}
+                                <label class="control-label" for="edit-{{ field|lower }}">{{ field|capitalize }}</label>
+                                <input class="form-control input-lg" id="edit-{{ field|lower }}" type="text" value="">
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="edit-submit" data-dismiss="modal">
+                            Save changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
