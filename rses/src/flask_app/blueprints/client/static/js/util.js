@@ -145,12 +145,11 @@ const decodeHTML = function (text) {
  * @returns {string}    Encoded
  */
 const encodeHTML = function (text) {
-	console.log('encode input', text);
+	
 	HTMLEntities.forEach(entity => {
 		text = text.replace(new RegExp(entity[1], 'g'), entity[0] + ';');
 	});
-
-	console.log('encode output', text);
+	
 	return encodeURIComponent(encodeURIComponent(text));
 };
 
@@ -160,9 +159,9 @@ const encodeHTML = function (text) {
  */
 const getDistFromBottom = function () {
 
-	var scrollPosition = window.pageYOffset;
-	var windowSize = window.innerHeight;
-	var bodyHeight = document.body.offsetHeight;
+	const scrollPosition = window.pageYOffset;
+	const windowSize = window.innerHeight;
+	const bodyHeight = document.body.offsetHeight;
 
 	return Math.max(bodyHeight - (scrollPosition + windowSize), 0);
 
