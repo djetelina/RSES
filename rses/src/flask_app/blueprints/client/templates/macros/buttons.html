@@ -1,0 +1,11 @@
+{% macro refresh_button(onclick) -%}
+    <span class="text-info rses-ab-heading rses-ab-i" onclick="{{ onclick }}">
+        <i class="fa fa-refresh" aria-hidden="true"></i> Refresh
+    </span>
+{%- endmacro %}
+
+{% macro new_button() -%}
+    <span class="text-success rses-ab-heading rses-ab-s" data-toggle="modal" data-target="#create-modal">
+        <i class="fa fa-plus-circle" aria-hidden="true"></i> New
+    </span>
+{%- endmacro %}

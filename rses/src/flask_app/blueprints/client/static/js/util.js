@@ -173,7 +173,7 @@ const getDistFromBottom = function () {
  * @returns {Element}   HTML element
  */
 const htmlToElement = function(html) {
-	var template = document.createElement('template');
+	const template = document.createElement('template');
 	template.innerHTML = html;
 	return template.content.firstChild;
 };

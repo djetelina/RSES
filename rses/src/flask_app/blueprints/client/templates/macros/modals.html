@@ -1,4 +1,4 @@
-{% macro modal_new(title, fields, onclick) %}
+{% macro modal_new(title, fields, onclick) -%}
     <div class="modal" id="create-modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -9,8 +9,9 @@
                 <form>
                     <div class="modal-body">
                         <div class="form-group">
-                            {% for field in fields%}
-                                <label class="control-label" for="create-{{ field|lower }}">{{ field|capitalize }}</label>
+                            {% for field in fields %}
+                                <label class="control-label"
+                                       for="create-{{ field|lower }}">{{ field|capitalize }}</label>
                                 <input class="form-control input-lg" id="create-{{ field|lower }}" type="text" value="">
                             {% endfor %}
                         </div>
@@ -26,9 +27,9 @@
             </div>
         </div>
     </div>
-{% endmacro %}
+{%- endmacro %}
 
-{% macro modal_edit(title, fields) %}
+{% macro modal_edit(title, fields) -%}
     <div class="modal" id="edit-modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -55,4 +56,4 @@
             </div>
         </div>
     </div>
-{% endmacro %}
+{%- endmacro %}
