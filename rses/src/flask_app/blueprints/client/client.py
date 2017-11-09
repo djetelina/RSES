@@ -25,8 +25,11 @@ def inject_menu_items() -> dict:
             'children': [{
                 'title': '<i class="fa fa-folder-open-o" aria-hidden="true"></i> Ingredient types',
                 'function_name': 'ingredient_types'
+            }, {
+                'title': '<i class="fa fa-lemon-o" aria-hidden="true"></i> Ingredients',
+                'function_name': 'ingredients'
             }]
-        }
+        },
     ])
 
 
@@ -78,3 +81,9 @@ def home():
 def ingredient_types():
     """View for managing ingredient types"""
     return render_template('stock/ingredient_types.html')
+
+
+@rses_web_client_bp.route('/manage/ingredients')
+def ingredients():
+    """View for managing ingredients"""
+    return render_template('stock/ingredients.html')

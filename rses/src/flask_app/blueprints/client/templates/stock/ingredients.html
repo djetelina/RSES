@@ -1,0 +1,65 @@
+{% extends "rses_base.html" %}
+{% from 'macros/modals.html' import modal_new, modal_edit %}
+{% from 'macros/buttons.html' import refresh_button, new_button %}
+{% from 'macros/badges.html' import spinning_refresh %}
+{% block title %}Ingredients{% endblock %}
+{% block content %}
+    {# Heading #}
+    <div class="row">
+        <div class="col-xs-12">
+            <h1>Ingredients {{ spinning_refresh('ingredient-total') }}</h1>
+        </div>
+    </div>
+
+    {# Table of ingredient types #}
+    <div class="jumbotron">
+        {# Table menu #}
+        <div class="rses-table-menu col-lg-10 col-sm-8 col-xs-12">
+            {{ new_button() }}
+            {{ refresh_button('refreshIngredients()') }}
+        </div>
+
+        <table class="table table-striped table-responsive">
+            <thead>
+            <tr>
+                <th width="30%" class=" keep-inline">
+                    <label for="filter-ingredient">Name</label>
+                    <span class="col-xs-7 col-md-5 col-lg-5">
+                            <input id="filter-ingredient-name" type="text" class="form-control input-sm"
+                                   onkeyup="refreshIngredients()" placeholder="Filter">
+                        </span>
+                </th>
+                <th class="keep-inline">In stock</th>
+                <th class=" keep-inline">Unit</th>
+                <th width="15%" class=" keep-inline">
+                    <label for="filter-ingredient">Ingredient Type</label>
+                    <span class="col-xs-7 col-md-5 col-lg-5">
+                            <input id="filter-ingredient-ingredient-type" type="text" class="form-control input-sm"
+                                   onkeyup="refreshIngredients()" placeholder="Filter">
+                        </span>
+                </th>
+                <th class="keep-inline">Suggestion Threshold</th>
+                <th class="keep-inline">Rebuy Threshold</th>
+                <th class="keep-inline">Durability</th>
+                <th class="text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody id="ingredients-table">
+            <tr>
+                <td colspan="8" align="center"><i class="text-info fa fa-refresh fa-spin fa-2x fa-fw"></i>
+                    <span class="sr-only">Loading...</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% set editable = ['name', 'unit', 'ingredient_type', 'suggestion_threshold', 'rebuy_threshold', 'durability'] %}
+    {{ modal_new('Create Ingredient', editable, 'IngredientsClass.createIngredient()') }}
+    {{ modal_edit('Edit Ingredient', editable) }}
+
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    <script src="{{ url_for('RSES_CLIENT.static', filename='js/ingredient.js') }}"></script>
+{% endblock %}

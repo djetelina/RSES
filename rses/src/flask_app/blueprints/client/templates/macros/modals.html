@@ -11,7 +11,7 @@
                         <div class="form-group">
                             {% for field in fields %}
                                 <label class="control-label"
-                                       for="create-{{ field|lower }}">{{ field|capitalize }}</label>
+                                       for="create-{{ field|lower }}">{{ field|replace('_', ' ')|capitalize }}</label>
                                 <input class="form-control input-lg" id="create-{{ field|lower }}" type="text" value="">
                             {% endfor %}
                         </div>
@@ -41,7 +41,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             {% for field in fields %}
-                                <label class="control-label" for="edit-{{ field|lower }}">{{ field|capitalize }}</label>
+                                <label class="control-label" for="edit-{{ field|lower }}">{{ field|replace('_', ' ')|capitalize }}</label>
                                 <input class="form-control input-lg" id="edit-{{ field|lower }}" type="text" value="">
                             {% endfor %}
                         </div>

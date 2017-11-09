@@ -112,6 +112,19 @@ class IngredientType:
         res = db.select(query, self._id)
         self._name = res.name
 
+    @classmethod
+    def load_by_name(cls, name):
+        """Loads ingredient type by name"""
+        query = """
+        SELECT id AS id
+        FROM ingredient_type
+        WHERE name = %s
+        """
+        res = db.select(query, name)
+        if not res:
+            raise rses_errors.DoesNotExist(IngredientType, name)
+        return cls(ingredient_type_id=res.id)
+
     @property
     def json_dict(self) -> Dict[str, Union[int, str]]:
         """Returns dictionary that can be jsonified and served by the api"""
@@ -148,7 +161,10 @@ class Ingredient:
         self._durability: Optional[int] = durability
         if not self._id:
             self.create()
-        else:
+        elif not any(
+                [self._name, self._unit, self._type, self._suggestion_threshold,
+                 self._rebuy_threshold, self._durability]
+        ):
             self.__load_from_db()
 
     @property
@@ -268,7 +284,7 @@ class Ingredient:
         Default thresholds are 0 and no durability is set.
         """
         log.debug('Trying to create new %s', str(self))
-        required_params = dict(type=self._type, unit=self._unit)
+        required_params = dict(type=self._type, unit=self._unit, ingredient_type=self._type)
         for name, param in required_params:
             if param is None:
                 rses_errors.MissingParameter(name)
@@ -306,6 +322,17 @@ class Ingredient:
             log.debug('There is still %s%s left to remove, calling recursively', amount, self._unit)
             self.remove_stock(amount)
 
+    def delete(self):
+        """Deletes an ingredient type"""
+        log.debug('Deleting %s', str(self))
+        if not self.exists():
+            raise rses_errors.DoesNotExist(Ingredient, identifier=self._name)
+        query = """
+        DELETE FROM ingredient
+        WHERE id = %s
+        """
+        db.delete(query, self._id)
+
     def __updater(self, column: str, new_value: Any) -> Any:
         """Updates the Ingredient entry's value for specified column"""
         log.debug('Updating ingredient column %s from %s to %s', column, getattr(self, 'column'), new_value)
@@ -320,16 +347,24 @@ class Ingredient:
     def __load_from_db(self):
         """Loads the ingredient from the database"""
         query = """
-        SELECT unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability
+        SELECT name, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability
         FROM ingredient
         WHERE id = %s
         """
         res = db.select(query, self._id)
+        self._name = res.name
         self._unit = res.unit
         self._type = IngredientType(ingredient_type_id=res.ingredient_type)
         self._suggestion_threshold = res.suggestion_threshold
         self._rebuy_threshold = res.rebuy_threshold
         self._durability = res.durability
+
+    @property
+    def json_dict(self) -> Dict[str, Union[int, str]]:
+        """Returns dictionary that can be jsonified and served by the api"""
+        return dict(id=self.id, name=self.name, unit=self.unit, type=self.type,
+                    suggestion_threshold=self.suggestion_threshold, rebuy_threshold=self.rebuy_threshold,
+                    durability=self.durability)
 
 
 class IngredientTypeListing:
@@ -366,3 +401,55 @@ class IngredientTypeListing:
         name_filter = f'%{name_filter}%'.lower()
         res = db.select_all(query, name_filter, limit, offset)
         return [IngredientType(ingredient_type_id=item.id, name=item.name).json_dict for item in res]
+
+
+class IngredientListing:
+    """class for total and individual items of Ingredient Type table"""
+
+    @property
+    def total(self) -> int:
+        """How many ingredient types there are in the database"""
+        query = """
+        SELECT COUNT(*) AS total
+        FROM ingredient
+        """
+        return db.select(query).total
+
+    @staticmethod
+    def show(limit: int = 50, offset: int = 0,
+             wanted_filters: Optional[dict] = None) -> List[Dict[str, Union[int, str]]]:
+        """
+        Lists ingredient types
+
+        :param limit:           How many to list
+        :param offset:          Select offset
+        :param wanted_filters:  Dictionary of items to be filtered
+        :return:                Filtered and limited ingredient types as dictionaries
+        """
+        filters = dict(
+            name='',
+            unit='',
+            ingredient_type=''
+        )
+        if wanted_filters is not None:
+            filters.update(wanted_filters)
+        query = """
+        SELECT id, name, unit, ingredient_type, suggestion_threshold, rebuy_threshold, durability
+        FROM ingredient
+        WHERE 
+          name LIKE %s
+          AND unit like %s
+          AND ingredient_type LIKE %s
+        ORDER BY name ASC
+        LIMIT %s
+        OFFSET %s
+        """
+        name_filter = f'%{filters["name"]}%'.lower()
+        unit_filter = f'%{filters["unit"]}%'.lower()
+        ingredient_type_filter = f'%{filters["ingredient_type"]}%'.lower()
+        res = db.select_all(query, name_filter, unit_filter, ingredient_type_filter, limit, offset)
+        return [Ingredient(
+            ingredient_id=item.id, name=item.name, unit=item.unit, ingredient_type=item.ingredient_type,
+            suggestion_threshold=item.suggestion_threshold, rebuy_threshold=item.rebuy_threshold,
+            durability=item.durability
+        ).json_dict for item in res]
