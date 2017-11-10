@@ -27,6 +27,9 @@ class IngredientType:
     def __repr__(self):
         return f'IngredientType(id={self.id}, name={self.name})'
 
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
     @property
     def id(self) -> int:
         """Id of the ingredient type in the database, cannot be modified"""

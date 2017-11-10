@@ -1,39 +1,18 @@
 # coding=utf-8
-import logging
-from typing import List, Any, Optional
-
 from pytest import fixture
 
-logging.basicConfig(level=logging.DEBUG)
-
-class DatabaseMocker:
-    """Super smart mocker for the database"""
-    def __init__(self, return_values: Optional[List[Any]]=None, rowcount: int=1):
-        if return_values is None:
-            return_values = list()
-        self.return_values: List[Any] = return_values
-        self.rowcount: int = rowcount
-        self.cursor = self
-        self.query = None
-        self.fetchall = self.fetchone
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def execute(self, query, args):
-        self.query = (query % args).encode()
-        pass
-
-    def fetchone(self):
-        return self.return_values.pop(0)
+from rses.src.objects import stock
 
 
-@fixture(scope='function')
-def database():
-    return DatabaseMocker
+@fixture(params=['dairy', 'DAIRY', 'DA I RY', 'D_A.I-R;Y', 'd41Ry'])
+def ingredient_type_no_create(request):
+    yield request.param
+    stock.IngredientType.load_by_name(request.param).delete()
+
+
+@fixture(params=['dairy', 'DAIRY', 'DA I RY', 'D_A.I-R;Y', 'd41Ry'])
+def ingredient_type(request):
+    ingredient_type = stock.IngredientType(name=request.param)
+    yield ingredient_type
+    # Reload from database, because tast could have done who knows what with it
+    stock.IngredientType(ingredient_type_id=ingredient_type.id).delete()
