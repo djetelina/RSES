@@ -124,7 +124,7 @@ class IngredientType:
         WHERE name = %s
         """
         res = db.select(query, name)
-        if not res:
+        if res is None:
             raise rses_errors.DoesNotExist(IngredientType, name)
         return cls(ingredient_type_id=res.id)
 
