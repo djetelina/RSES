@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"
+install:
+  - pip install pipenv
+  - pipenv install --system --deploy
+  - pipenv install --dev --system --deploy
+services:
+  - postgresql
+before_script:
+  - psql -f database/create.sql -U postgres
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)/rses/src
+script:
+  - pytest tests

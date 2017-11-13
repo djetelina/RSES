@@ -215,7 +215,7 @@ class Ingredient:
     @property
     def rebuy_threshold(self) -> float:
         """Threshold, at which shopping list will add it as 'to buy'"""
-        return self._suggestion_threshold
+        return self._rebuy_threshold
 
     @rebuy_threshold.setter
     def rebuy_threshold(self, new_threshold: float):
@@ -288,7 +288,7 @@ class Ingredient:
         """
         log.debug('Trying to create new %s', str(self))
         required_params = dict(type=self._type, unit=self._unit, ingredient_type=self._type)
-        for name, param in required_params:
+        for name, param in required_params.items():
             if param is None:
                 rses_errors.MissingParameter(name)
         if self.exists():
@@ -361,6 +361,17 @@ class Ingredient:
         self._suggestion_threshold = res.suggestion_threshold
         self._rebuy_threshold = res.rebuy_threshold
         self._durability = res.durability
+
+    @classmethod
+    def load_by_name(cls, name):
+        """Loads the ingredient from the database"""
+        query = """
+        SELECT id as id
+        FROM ingredient
+        WHERE name = %s
+        """
+        res = db.select(query, name)
+        return cls(ingredient_id=res.id)
 
     @property
     def json_dict(self) -> Dict[str, Union[int, str]]:

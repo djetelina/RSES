@@ -18,7 +18,7 @@ class DoesNotExist(Exception):
         self.add_info: Optional[str] = add_info
 
     def __str__(self):
-        message = f'Error: {self.what} identified by {self.identifier} does not exist. '
+        message = f'{self.what} identified by {self.identifier} does not exist. '
         if self.add_info is not None:
             message += self.add_info
         return message
@@ -37,8 +37,8 @@ class AlreadyExists(Exception):
 
     def __str__(self):
         if self.relation is not None:
-            return f'Error: {repr(self.what)} in relation to {repr(self.relation)} already exists'
-        return f'Error: {repr(self.what)} already exists'
+            return f'{repr(self.what)} in relation to {repr(self.relation)} already exists'
+        return f'{repr(self.what)} already exists'
 
 
 class MissingParameter(Exception):
@@ -50,7 +50,7 @@ class MissingParameter(Exception):
         self.parameter = parameter
 
     def __str__(self):
-        return f'Error: Missing parameter {self.parameter}'
+        return f'Missing parameter {self.parameter}'
 
 
 class NotEnoughIngredients(Exception):
