@@ -8,7 +8,8 @@ install:
 services:
   - postgresql
 before_script:
-  - psql -f database/create.sql -U postgres
+  - psql -c 'create database rses;' -U postgres
+  - psql -f database/create.sql -U postgres -d rses
   - export PYTHONPATH=$PYTHONPATH:$(pwd)/rses/src
 script:
   - pytest tests
